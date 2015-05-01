@@ -5,7 +5,6 @@
  */
 package view;
 
-import controller.ChartGenerator;
 import controller.Controller;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -18,8 +17,6 @@ public class Dashboard extends javax.swing.JFrame {
 
     private Controller controller;
     
-    private ChartGenerator chartGenerator;
-    
     /**
      * Creates new form Dashboard
      */
@@ -28,6 +25,16 @@ public class Dashboard extends javax.swing.JFrame {
         initComponents();
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+        if (controller.getCurrentStatus()) {
+            switchButton.setText("READ ON");
+        } else {
+            switchButton.setText("READ OFF");
+        }
+        if (controller.getBuzzerStatus()) {
+            buzzerButton.setText("BUZZER ON");
+        } else {
+            buzzerButton.setText("BUZZER OFF");
+        }
     }
 
     /**
@@ -39,29 +46,25 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        ChartPanel = new javax.swing.JPanel();
+        ChartPanel = new javax.swing.JPanel(controller.generateChart());
         ControlPanel = new javax.swing.JPanel();
         switchButton = new javax.swing.JButton();
-        timeConstrainButton = new javax.swing.JButton();
-        powerConstrainButton = new javax.swing.JButton();
+        timeLimitButton = new javax.swing.JButton();
+        energyLimitButton = new javax.swing.JButton();
         exitButton = new javax.swing.JButton();
+        buzzerButton = new javax.swing.JButton();
+        timeLimit = new javax.swing.JSpinner();
+        energyLimit = new javax.swing.JSpinner();
         jMenuBar1 = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
-        connectButtonMenu = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         exitButtonMenu = new javax.swing.JMenuItem();
         actionMenu = new javax.swing.JMenu();
         switchButtonMenu = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
-        constrainMenu = new javax.swing.JMenu();
-        timeConstrainButtonMenu = new javax.swing.JMenuItem();
-        powerConstrainButtonMenu = new javax.swing.JMenuItem();
-        helpMenu = new javax.swing.JMenu();
-        documentationButton = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Dashboard");
-        setPreferredSize(new java.awt.Dimension(600, 400));
 
         ChartPanel.setBackground(new java.awt.Color(0, 0, 0, 100));
         ChartPanel.setPreferredSize(new java.awt.Dimension(438, 150));
@@ -88,17 +91,17 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        timeConstrainButton.setText("Set Time Constrain");
-        timeConstrainButton.addActionListener(new java.awt.event.ActionListener() {
+        timeLimitButton.setText("Set Time Limit");
+        timeLimitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                timeConstrainButtonActionPerformed(evt);
+                timeLimitButtonActionPerformed(evt);
             }
         });
 
-        powerConstrainButton.setText("Set Power Constrain");
-        powerConstrainButton.addActionListener(new java.awt.event.ActionListener() {
+        energyLimitButton.setText("Set Energy Limit");
+        energyLimitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                powerConstrainButtonActionPerformed(evt);
+                energyLimitButtonActionPerformed(evt);
             }
         });
 
@@ -109,42 +112,50 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        buzzerButton.setText("Buzzer Switch");
+        buzzerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buzzerButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout ControlPanelLayout = new javax.swing.GroupLayout(ControlPanel);
         ControlPanel.setLayout(ControlPanelLayout);
         ControlPanelLayout.setHorizontalGroup(
             ControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ControlPanelLayout.createSequentialGroup()
-                .addContainerGap(25, Short.MAX_VALUE)
-                .addGroup(ControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(exitButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(timeConstrainButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(switchButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(powerConstrainButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(21, 21, 21))
+                .addContainerGap(32, Short.MAX_VALUE)
+                .addGroup(ControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(switchButton)
+                    .addComponent(buzzerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(timeLimit, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(timeLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(energyLimit, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(energyLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(exitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(29, 29, 29))
         );
         ControlPanelLayout.setVerticalGroup(
             ControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(ControlPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(switchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(timeConstrainButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(powerConstrainButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(buzzerButton)
+                .addGap(36, 36, 36)
+                .addComponent(timeLimit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(timeLimitButton)
+                .addGap(57, 57, 57)
+                .addComponent(energyLimit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(energyLimitButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
                 .addComponent(exitButton)
-                .addContainerGap(220, Short.MAX_VALUE))
+                .addGap(22, 22, 22))
         );
 
         fileMenu.setText("File");
-
-        connectButtonMenu.setText("Connect ...");
-        connectButtonMenu.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                connectButtonMenuActionPerformed(evt);
-            }
-        });
-        fileMenu.add(connectButtonMenu);
         fileMenu.add(jSeparator1);
 
         exitButtonMenu.setText("Exit");
@@ -168,39 +179,7 @@ public class Dashboard extends javax.swing.JFrame {
         actionMenu.add(switchButtonMenu);
         actionMenu.add(jSeparator2);
 
-        constrainMenu.setText("Set Constrain...");
-
-        timeConstrainButtonMenu.setText("Set Time Constrain ");
-        timeConstrainButtonMenu.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                timeConstrainButtonMenuActionPerformed(evt);
-            }
-        });
-        constrainMenu.add(timeConstrainButtonMenu);
-
-        powerConstrainButtonMenu.setText("Set Power Constrain");
-        powerConstrainButtonMenu.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                powerConstrainButtonMenuActionPerformed(evt);
-            }
-        });
-        constrainMenu.add(powerConstrainButtonMenu);
-
-        actionMenu.add(constrainMenu);
-
         jMenuBar1.add(actionMenu);
-
-        helpMenu.setText("Help");
-
-        documentationButton.setText("Documentation");
-        documentationButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                documentationButtonActionPerformed(evt);
-            }
-        });
-        helpMenu.add(documentationButton);
-
-        jMenuBar1.add(helpMenu);
 
         setJMenuBar(jMenuBar1);
 
@@ -222,45 +201,49 @@ public class Dashboard extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void connectButtonMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonMenuActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_connectButtonMenuActionPerformed
-
     private void exitButtonMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonMenuActionPerformed
         exit();
     }//GEN-LAST:event_exitButtonMenuActionPerformed
 
     private void switchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchButtonActionPerformed
-        // TODO add your handling code here:
+        controller.switchCurrentStatus();
+        if (controller.getCurrentStatus()) {
+            switchButton.setText("READ ON");
+        } else {
+            switchButton.setText("READ OFF");
+        }
     }//GEN-LAST:event_switchButtonActionPerformed
 
-    private void timeConstrainButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeConstrainButtonActionPerformed
+    private void timeLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeLimitButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_timeConstrainButtonActionPerformed
+    }//GEN-LAST:event_timeLimitButtonActionPerformed
 
-    private void powerConstrainButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_powerConstrainButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_powerConstrainButtonActionPerformed
+    private void energyLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_energyLimitButtonActionPerformed
+        controller.setPowerConstrain((double) energyLimit.getValue());
+        
+    }//GEN-LAST:event_energyLimitButtonActionPerformed
 
     private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
         exit();
     }//GEN-LAST:event_exitButtonActionPerformed
 
     private void switchButtonMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchButtonMenuActionPerformed
-        // TODO add your handling code here:
+        controller.switchCurrentStatus();
+        if (controller.getCurrentStatus()) {
+            switchButton.setText("READ ON");
+        } else {
+            switchButton.setText("READ OFF");
+        }
     }//GEN-LAST:event_switchButtonMenuActionPerformed
 
-    private void timeConstrainButtonMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeConstrainButtonMenuActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_timeConstrainButtonMenuActionPerformed
-
-    private void powerConstrainButtonMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_powerConstrainButtonMenuActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_powerConstrainButtonMenuActionPerformed
-
-    private void documentationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_documentationButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_documentationButtonActionPerformed
+    private void buzzerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buzzerButtonActionPerformed
+        controller.switchBuzzerStatus();
+        if (controller.getBuzzerStatus()) {
+            buzzerButton.setText("BUZZER ON");
+        } else {
+            buzzerButton.setText("BUZZER OFF");
+        }
+    }//GEN-LAST:event_buzzerButtonActionPerformed
 
     private void exit() {
         System.exit(0);
@@ -301,21 +284,18 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel ChartPanel;
     private javax.swing.JPanel ControlPanel;
     private javax.swing.JMenu actionMenu;
-    private javax.swing.JMenuItem connectButtonMenu;
-    private javax.swing.JMenu constrainMenu;
-    private javax.swing.JMenuItem documentationButton;
+    private javax.swing.JButton buzzerButton;
+    private javax.swing.JSpinner energyLimit;
+    private javax.swing.JButton energyLimitButton;
     private javax.swing.JButton exitButton;
     private javax.swing.JMenuItem exitButtonMenu;
     private javax.swing.JMenu fileMenu;
-    private javax.swing.JMenu helpMenu;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
-    private javax.swing.JButton powerConstrainButton;
-    private javax.swing.JMenuItem powerConstrainButtonMenu;
     private javax.swing.JButton switchButton;
     private javax.swing.JMenuItem switchButtonMenu;
-    private javax.swing.JButton timeConstrainButton;
-    private javax.swing.JMenuItem timeConstrainButtonMenu;
+    private javax.swing.JSpinner timeLimit;
+    private javax.swing.JButton timeLimitButton;
     // End of variables declaration//GEN-END:variables
 }
