@@ -7,6 +7,7 @@ package controller;
 
 import java.sql.Time;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,11 +40,14 @@ public class Controller {
     
     private ArrayBlockingQueue<Double> listPowerData;
     
+    private DefaultCategoryDataset dataset;
+    
     /**
      * Create new instance of Controller
      * @param COM port name
      */
     public Controller(String COM) {
+        System.out.println("Controller is instantiated");
         this.sizeNumber = 60;
         con = new Connector(COM);
         energyLimit = Double.POSITIVE_INFINITY;
@@ -75,7 +79,6 @@ public class Controller {
          "Power",
          generateDataset(),PlotOrientation.VERTICAL,
          true,true,false);
-        DefaultCategoryDataset dataset = generateDataset();
         return lineChartObject;
     }
     
@@ -85,7 +88,7 @@ public class Controller {
      */
     public void changeConnection(String COM) {
         con.setPortName(COM);
-        con.openConnection();
+        con.open();
     }
     
     /**
@@ -94,7 +97,13 @@ public class Controller {
     public void switchCurrentStatus() {
         try {
             currentStatus = !currentStatus;
-            con.pushData(currentStatus.toString());
+            Integer current = 1;
+            if (currentStatus) {
+                current = 1;
+            } else {
+                current = 0;
+            }
+            con.pushData(current.toString());
         } catch (SerialPortException ex) {
             currentStatus = !currentStatus;
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
@@ -109,9 +118,9 @@ public class Controller {
             buzzerStatus = !buzzerStatus;
             Integer buzzer = 0;
             if (buzzerStatus) {
-                buzzer = 1;
-            } else {
                 buzzer = 0;
+            } else {
+                buzzer = 1;
             }
             buzzer += 2;
             con.pushData(buzzer.toString());
@@ -176,11 +185,11 @@ public class Controller {
      */
     private DefaultCategoryDataset generateDataset() {
         readData();
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        Double[] data = (Double[]) listPowerData.toArray();
-        for (Double datum : data) {
+        dataset = new DefaultCategoryDataset();
+        for (Double datum : listPowerData) {
             dataset.addValue(datum, "", "");
         }
+        System.out.println(Arrays.deepToString(listPowerData.toArray()));
         return dataset;
     }
     
@@ -193,7 +202,7 @@ public class Controller {
         if (rawdata == null) {
             data = (double) 0;
         } else {
-            data = Double.valueOf(Arrays.toString(rawdata));
+            data = Double.valueOf(new String(rawdata));
         }
         if (listPowerData.size() == sizeNumber) {
             listPowerData.remove();

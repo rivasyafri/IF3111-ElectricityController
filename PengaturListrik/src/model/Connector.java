@@ -5,8 +5,7 @@
  */
 package model;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.BufferedReader;
 import jssc.SerialPort;
 import jssc.SerialPortException;
 
@@ -15,9 +14,12 @@ import jssc.SerialPortException;
  * @author RivaSyafri
  */
 public class Connector {
+    
     private SerialPort serialPort;
     
     private byte[] buffer;
+    
+    private BufferedReader input;
     
     /**
      *
@@ -27,11 +29,11 @@ public class Connector {
         serialPort = new SerialPort(COM);
         try {
             // Open Serial Port
-            serialPort.openPort();
+            System.out.println("Port opened: " + serialPort.openPort());
 
             // Define Parameter -- can be found in Device Manager
             // baudRate, iataBits, stopBits, parity
-            serialPort.setParams(9600,8,1,0);
+            System.out.println("Params setted: " + serialPort.setParams(9600, 8, 1, 0));
         } catch (SerialPortException ex) {
             System.out.println(ex);
 
@@ -41,7 +43,7 @@ public class Connector {
     /**
      * Open connection to port
      */
-    public void openConnection(){
+    public void open(){
         try {
             serialPort.openPort();
             
@@ -49,18 +51,18 @@ public class Connector {
             // baudRate, iataBits, stopBits, parity
             serialPort.setParams(9600,8,1,0);
         } catch (SerialPortException ex) {
-            Logger.getLogger(Connector.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex);
         }
     }
     
     /**
      * Close connection to port
      */
-    public void closeConnection() {
+    public void close() {
         try {
             serialPort.closePort();
         } catch (SerialPortException ex) {
-            Logger.getLogger(Connector.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex);
         }
     }
     
@@ -69,7 +71,7 @@ public class Connector {
      * @param COM port name
      */
     public void setPortName(String COM) {
-        closeConnection();
+        close();
         serialPort = new SerialPort(COM);
     }
     
@@ -87,11 +89,11 @@ public class Connector {
     public byte[] pullData() {
         byte[] buff = null;
         try {
-            serialPort.writeBytes("4".getBytes());
-            //Retrieve data from Arduino -- read 10 bytes
-            buff = serialPort.readBytes(10);
+            //serialPort.writeBytes("4".getBytes());
+            //Retrieve data from Arduino -- read 8 bytes
+            buff = serialPort.readBytes(5);
         } catch (SerialPortException ex) {
-            Logger.getLogger(Connector.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex);
         }
         return buff;
     }
@@ -104,4 +106,5 @@ public class Connector {
     public void pushData(String action) throws SerialPortException {
         serialPort.writeBytes(action.getBytes());
     }
+    
 }

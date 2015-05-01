@@ -8,6 +8,8 @@ package view;
 import controller.Controller;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import javax.swing.JPanel;
+import org.jfree.chart.ChartPanel;
 
 /**
  *
@@ -15,13 +17,13 @@ import java.awt.Toolkit;
  */
 public class Dashboard extends javax.swing.JFrame {
 
-    private Controller controller;
+    private final Controller controller;
     
     /**
      * Creates new form Dashboard
      */
     public Dashboard() {
-        controller = new Controller("COM11");
+        controller = new Controller("COM4");
         initComponents();
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
@@ -35,6 +37,7 @@ public class Dashboard extends javax.swing.JFrame {
         } else {
             buzzerButton.setText("BUZZER OFF");
         }
+        chartPanel.add(new LineChart(controller.generateChart()));
     }
 
     /**
@@ -46,8 +49,8 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        ChartPanel = new javax.swing.JPanel(controller.generateChart());
-        ControlPanel = new javax.swing.JPanel();
+        chartPanel = new javax.swing.JPanel();
+        controlPanel = new javax.swing.JPanel();
         switchButton = new javax.swing.JButton();
         timeLimitButton = new javax.swing.JButton();
         energyLimitButton = new javax.swing.JButton();
@@ -65,23 +68,26 @@ public class Dashboard extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Dashboard");
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        ChartPanel.setBackground(new java.awt.Color(0, 0, 0, 100));
-        ChartPanel.setPreferredSize(new java.awt.Dimension(438, 150));
+        chartPanel.setPreferredSize(new java.awt.Dimension(438, 150));
 
-        javax.swing.GroupLayout ChartPanelLayout = new javax.swing.GroupLayout(ChartPanel);
-        ChartPanel.setLayout(ChartPanelLayout);
-        ChartPanelLayout.setHorizontalGroup(
-            ChartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout chartPanelLayout = new javax.swing.GroupLayout(chartPanel);
+        chartPanel.setLayout(chartPanelLayout);
+        chartPanelLayout.setHorizontalGroup(
+            chartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 408, Short.MAX_VALUE)
         );
-        ChartPanelLayout.setVerticalGroup(
-            ChartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+        chartPanelLayout.setVerticalGroup(
+            chartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 379, Short.MAX_VALUE)
         );
 
-        ControlPanel.setBackground(new java.awt.Color(0, 0, 0, 200));
-        ControlPanel.setPreferredSize(new java.awt.Dimension(150, 150));
+        getContentPane().add(chartPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 408, 379));
+
+        controlPanel.setBackground(new java.awt.Color(0, 0, 0, 200));
+        controlPanel.setPreferredSize(new java.awt.Dimension(150, 150));
+        controlPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         switchButton.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
         switchButton.setText("SWITCH");
@@ -90,6 +96,7 @@ public class Dashboard extends javax.swing.JFrame {
                 switchButtonActionPerformed(evt);
             }
         });
+        controlPanel.add(switchButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 11, -1, 40));
 
         timeLimitButton.setText("Set Time Limit");
         timeLimitButton.addActionListener(new java.awt.event.ActionListener() {
@@ -97,6 +104,7 @@ public class Dashboard extends javax.swing.JFrame {
                 timeLimitButtonActionPerformed(evt);
             }
         });
+        controlPanel.add(timeLimitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 143, 119, -1));
 
         energyLimitButton.setText("Set Energy Limit");
         energyLimitButton.addActionListener(new java.awt.event.ActionListener() {
@@ -104,6 +112,7 @@ public class Dashboard extends javax.swing.JFrame {
                 energyLimitButtonActionPerformed(evt);
             }
         });
+        controlPanel.add(energyLimitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 251, 119, -1));
 
         exitButton.setText("Exit");
         exitButton.addActionListener(new java.awt.event.ActionListener() {
@@ -111,6 +120,7 @@ public class Dashboard extends javax.swing.JFrame {
                 exitButtonActionPerformed(evt);
             }
         });
+        controlPanel.add(exitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 332, 119, -1));
 
         buzzerButton.setText("Buzzer Switch");
         buzzerButton.addActionListener(new java.awt.event.ActionListener() {
@@ -118,42 +128,11 @@ public class Dashboard extends javax.swing.JFrame {
                 buzzerButtonActionPerformed(evt);
             }
         });
+        controlPanel.add(buzzerButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 56, 119, -1));
+        controlPanel.add(timeLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 117, 119, -1));
+        controlPanel.add(energyLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 225, 119, -1));
 
-        javax.swing.GroupLayout ControlPanelLayout = new javax.swing.GroupLayout(ControlPanel);
-        ControlPanel.setLayout(ControlPanelLayout);
-        ControlPanelLayout.setHorizontalGroup(
-            ControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ControlPanelLayout.createSequentialGroup()
-                .addContainerGap(32, Short.MAX_VALUE)
-                .addGroup(ControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(switchButton)
-                    .addComponent(buzzerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(timeLimit, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(timeLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(energyLimit, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(energyLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(exitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(29, 29, 29))
-        );
-        ControlPanelLayout.setVerticalGroup(
-            ControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ControlPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(switchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(buzzerButton)
-                .addGap(36, 36, 36)
-                .addComponent(timeLimit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(timeLimitButton)
-                .addGap(57, 57, 57)
-                .addComponent(energyLimit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(energyLimitButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
-                .addComponent(exitButton)
-                .addGap(22, 22, 22))
-        );
+        getContentPane().add(controlPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 0, 180, 379));
 
         fileMenu.setText("File");
         fileMenu.add(jSeparator1);
@@ -182,21 +161,6 @@ public class Dashboard extends javax.swing.JFrame {
         jMenuBar1.add(actionMenu);
 
         setJMenuBar(jMenuBar1);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(ChartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(ControlPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(ChartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE)
-            .addComponent(ControlPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE)
-        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -249,6 +213,14 @@ public class Dashboard extends javax.swing.JFrame {
         System.exit(0);
     }
     
+    public Controller getController() {
+        return controller;
+    }
+    
+    public JPanel getChartPanel() {
+        return chartPanel;
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -269,22 +241,27 @@ public class Dashboard extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(Dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        
-        //</editor-fold>
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Dashboard().setVisible(true);
-            }
+        Dashboard main = new Dashboard();
+        java.awt.EventQueue.invokeLater(() -> {
+            main.setVisible(true);
         });
+        Thread t=new Thread() {
+            @Override
+            public void run() {
+                while (true) {
+                    main.getController().generateChart();
+                }
+            }
+        };
+        t.start();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel ChartPanel;
-    private javax.swing.JPanel ControlPanel;
     private javax.swing.JMenu actionMenu;
     private javax.swing.JButton buzzerButton;
+    private javax.swing.JPanel chartPanel;
+    private javax.swing.JPanel controlPanel;
     private javax.swing.JSpinner energyLimit;
     private javax.swing.JButton energyLimitButton;
     private javax.swing.JButton exitButton;
