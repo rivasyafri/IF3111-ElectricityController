@@ -266,8 +266,8 @@ public class Controller {
         readData();
         XYSeries series = new XYSeries("power");
         int time = 0;
-        for (int i = 0; i < 30; i++)
-            series.add(Math.random(), i);
+        for (int i = 0; i < 60; i++)
+            series.add(i, Math.random());
         /*for (Double datum : listPowerData) {
             series.add(time, datum);
             time++;

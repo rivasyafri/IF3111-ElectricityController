@@ -12,7 +12,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import org.jfree.chart.ChartPanel;
 
 /**
@@ -25,7 +24,7 @@ public class Dashboard extends javax.swing.JFrame {
     
     private final String portName;
     
-    private FrameController fc;
+    private final FrameController fc;
     
     /**
      * Creates new form Dashboard
@@ -47,6 +46,23 @@ public class Dashboard extends javax.swing.JFrame {
         changeBuzzerImage();
     }
 
+    public Controller getController() {
+        return controller;
+    }
+    
+    public javax.swing.JPanel getChartPanel() {
+        return chartPanel;
+    }
+    
+    public void updateChart() {
+        chartPanel.removeAll();
+        ChartPanel chart = new ChartPanel(controller.generateChart());
+        chart.setDomainZoomable(true);
+        chartPanel.add(chart, BorderLayout.CENTER);
+        chartPanel.revalidate();
+        chartPanel.repaint();
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -242,15 +258,7 @@ public class Dashboard extends javax.swing.JFrame {
             buzzerButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/off (60x38).jpg"))); // NOI18N
         }
     }
-    
-    public Controller getController() {
-        return controller;
-    }
-    
-    public JPanel getChartPanel() {
-        return chartPanel;
-    }
-    
+
     /**
      * @param args the command line arguments
      */
