@@ -23,6 +23,7 @@
  */
 package view;
 
+import controller.FrameController;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
@@ -34,10 +35,14 @@ public class PortSetter extends javax.swing.JFrame {
 
     private String portName;
     
+    private FrameController fc;
+    
     /**
      * Creates new form PortSetter
+     * @param fc Frame Controller
      */
-    public PortSetter() {
+    public PortSetter(FrameController fc) {
+        this.fc = fc;
         initComponents();
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
@@ -121,44 +126,13 @@ public class PortSetter extends javax.swing.JFrame {
     
     private void OKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OKButtonActionPerformed
         portName = portNameField.getText();
-        Dashboard dashboard = new Dashboard(portName);
-        setVisible(false);
-        dispose();
-        dashboard.setVisible(true);
+        fc.setDashboard(new Dashboard(portName, fc));
+        fc.showDashboard();
     }//GEN-LAST:event_OKButtonActionPerformed
 
     private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
         System.exit(0);
     }//GEN-LAST:event_exitButtonActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Windows look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Windows".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PortSetter.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> {
-            new PortSetter().setVisible(true);
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton OKButton;

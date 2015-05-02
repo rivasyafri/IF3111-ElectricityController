@@ -6,6 +6,7 @@
 package view;
 
 import controller.Controller;
+import controller.FrameController;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -24,11 +25,15 @@ public class Dashboard extends javax.swing.JFrame {
     
     private final String portName;
     
+    private FrameController fc;
+    
     /**
      * Creates new form Dashboard
      * @param portName
+     * @param fc
      */
-    public Dashboard(String portName) {
+    public Dashboard(String portName, FrameController fc) {
+        this.fc = fc;
         controller = new Controller(portName);
         this.portName = portName;
         initComponents();
@@ -213,10 +218,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_buzzerButtonActionPerformed
 
     private void setPortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setPortButtonActionPerformed
-        PortSetter portSetter = new PortSetter();
-        setVisible(false);
-        portSetter.setVisible(true);
-        dispose();
+        fc.showPortSetter();
     }//GEN-LAST:event_setPortButtonActionPerformed
 
     private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
