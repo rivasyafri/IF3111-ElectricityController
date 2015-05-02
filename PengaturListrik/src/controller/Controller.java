@@ -264,14 +264,15 @@ public class Controller {
      */
     private XYSeriesCollection generateDataset() {
         readData();
+        //generateDummyData();
         XYSeries series = new XYSeries("power");
         int time = 0;
-        for (int i = 0; i < 60; i++)
-            series.add(i, Math.random());
-        /*for (Double datum : listPowerData) {
+        /*for (int i = 0; i < 60; i++)
+            series.add(i, Math.random());*/
+        for (Double datum : listPowerData) {
             series.add(time, datum);
             time++;
-        }*/
+        }
         dataset = new XYSeriesCollection(series);
         return dataset;
     }
@@ -309,4 +310,12 @@ public class Controller {
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    /*private void generateDummyData() {
+        double data = Math.random();
+        if (listPowerData.size() == sizeNumber) {
+            listPowerData.remove();
+        }
+        listPowerData.add(data);
+    }*/
 }
