@@ -7,7 +7,6 @@ package controller;
 
 import java.sql.Time;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,7 +15,8 @@ import model.Connector;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 /**
  * Class to control connector and to process data
@@ -40,7 +40,7 @@ public class Controller {
     
     private ArrayBlockingQueue<Double> listPowerData;
     
-    private DefaultCategoryDataset dataset;
+    private XYSeriesCollection dataset;
     
     /**
      * Create new instance of Controller
@@ -74,10 +74,10 @@ public class Controller {
      * @return return chart
      */
     public JFreeChart generateChart() {
-        JFreeChart lineChartObject = ChartFactory.createLineChart(
-         "Power Chart","Time",
+        JFreeChart lineChartObject = ChartFactory.createXYLineChart(
+         null,"Time",
          "Power",
-         generateDataset(),PlotOrientation.VERTICAL,
+         generateDataset(),PlotOrientation.HORIZONTAL,
          true,true,false);
         return lineChartObject;
     }
@@ -183,13 +183,16 @@ public class Controller {
      * Generate dataset for Line Chart
      * @return dataset
      */
-    private DefaultCategoryDataset generateDataset() {
+    private XYSeriesCollection generateDataset() {
         readData();
-        dataset = new DefaultCategoryDataset();
+        XYSeries series = new XYSeries("power");
+        int time = 0;
         for (Double datum : listPowerData) {
-            dataset.addValue(datum, "", "");
+            series.add(time, datum);
+            time++;
         }
         System.out.println(Arrays.deepToString(listPowerData.toArray()));
+        dataset = new XYSeriesCollection(series);
         return dataset;
     }
     

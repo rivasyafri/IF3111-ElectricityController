@@ -6,6 +6,7 @@
 package view;
 
 import controller.Controller;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import javax.swing.JPanel;
@@ -17,12 +18,22 @@ import org.jfree.chart.ChartPanel;
  */
 public class Dashboard extends javax.swing.JFrame {
 
-    private final Controller controller;
+    public final Controller controller;
+    
+    public double time = 0.0;
+    
+    // Init some starting data
+    double[][] model = {{0.0}};
+    double[] columns = {};
+    String[] rows = {"Power"};
+
+    String title = "Power Chart";
     
     /**
      * Creates new form Dashboard
      */
     public Dashboard() {
+       
         controller = new Controller("COM4");
         initComponents();
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -37,7 +48,6 @@ public class Dashboard extends javax.swing.JFrame {
         } else {
             buzzerButton.setText("BUZZER OFF");
         }
-        chartPanel.add(new LineChart(controller.generateChart()));
     }
 
     /**
@@ -49,6 +59,8 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        ChartPanel chart = new ChartPanel(controller.generateChart());
+        chart.setDomainZoomable(true);
         chartPanel = new javax.swing.JPanel();
         controlPanel = new javax.swing.JPanel();
         switchButton = new javax.swing.JButton();
@@ -71,17 +83,9 @@ public class Dashboard extends javax.swing.JFrame {
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         chartPanel.setPreferredSize(new java.awt.Dimension(438, 150));
+        chartPanel.setLayout(new java.awt.BorderLayout());
 
-        javax.swing.GroupLayout chartPanelLayout = new javax.swing.GroupLayout(chartPanel);
-        chartPanel.setLayout(chartPanelLayout);
-        chartPanelLayout.setHorizontalGroup(
-            chartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 408, Short.MAX_VALUE)
-        );
-        chartPanelLayout.setVerticalGroup(
-            chartPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 379, Short.MAX_VALUE)
-        );
+        chartPanel.add(chart, BorderLayout.CENTER);
 
         getContentPane().add(chartPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 408, 379));
 
@@ -246,15 +250,32 @@ public class Dashboard extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(() -> {
             main.setVisible(true);
         });
-        Thread t=new Thread() {
+        /*
+        Thread t = new Thread() {
+            ChartPanel panel;
+            
             @Override
             public void run() {
                 while (true) {
-                    main.getController().generateChart();
+                    main.getChartPanel().removeAll();
+            
+                    // Creating the Swing ChartPanel instead of DefaultChart
+                    panel = new ChartPanel(data, title, DefaultChart.LINEAR_X_LINEAR_Y);
+                    // Adding ChartRenderer as usual
+                    panel.addChartRenderer(new LineChartRenderer(panel.getCoordSystem(), data), 1);
+                    panel.setSize(400, 300);
+                    main.getChartPanel().add(panel, BorderLayout.CENTER);
+
+                    double datum = main.controller.readData();
+                    System.out.println(datum);
+                    main.data.insertValue(0, datum, time);
+                    main.time++;
+                    panel.addChartPanel.revalidate();
+                    panel.addChartPanel.repaint();
                 }
             }
         };
-        t.start();
+        t.start();*/
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
