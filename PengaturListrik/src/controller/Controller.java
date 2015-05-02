@@ -47,9 +47,11 @@ public class Controller {
     
     private int timer;
     
-    private int sizeNumber;
+    private final int sizeNumber = 60;
     
     private ArrayBlockingQueue<Double> listPowerData;
+    
+    private ArrayBlockingQueue<Double> listEnergyData;
     
     private XYSeriesCollection dataset;
     
@@ -58,11 +60,11 @@ public class Controller {
      */
     public Controller() {
         System.out.println("Controller is instantiated");
-        this.sizeNumber = 60;
         energyLimit = Double.POSITIVE_INFINITY;
         timeLimit = null;
         totalPower = 0;
         listPowerData = new ArrayBlockingQueue(sizeNumber);
+        listEnergyData = new ArrayBlockingQueue(sizeNumber);
     }
     
     /**
@@ -71,11 +73,11 @@ public class Controller {
      */
     public Controller(String COM) {
         System.out.println("Controller is instantiated");
-        this.sizeNumber = 60;
         energyLimit = Double.POSITIVE_INFINITY;
         timeLimit = null;
         totalPower = 0;
         listPowerData = new ArrayBlockingQueue(sizeNumber);
+        listEnergyData = new ArrayBlockingQueue(sizeNumber);
         con = new Connector(COM);
         currentStatus = con.getStatus();
     }
@@ -85,12 +87,12 @@ public class Controller {
      * @param con connector
      */
     public Controller(Connector con) {
-        this.sizeNumber = 60;
         this.con = con;
         energyLimit = null;
         timeLimit = null;
         totalPower = (float) 0;
         listPowerData = new ArrayBlockingQueue(sizeNumber);
+        listEnergyData = new ArrayBlockingQueue(sizeNumber);
         currentStatus = con.getStatus();
     }
     
@@ -116,7 +118,6 @@ public class Controller {
     /**
      * Change the connection
      * @param COM port name
-     * @return true if success
      */
     public void changeConnection(String COM) {
         con = new Connector(COM);
@@ -137,18 +138,17 @@ public class Controller {
      * @return return value if success or not
      */
     public boolean switchCurrentStatus() {
-        currentStatus = !currentStatus;
         Integer current = 1;
         if (currentStatus) {
-            current = 1;
-        } else {
             current = 0;
+        } else {
+            current = 1;
         }
         boolean success = true;
         try {
             con.pushData(current.toString());
-        } catch (SerialPortException ex) {
             currentStatus = !currentStatus;
+        } catch (SerialPortException ex) {
             errorMessage = ex.getMessage();
             success = false;
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
@@ -161,19 +161,18 @@ public class Controller {
      * @return return value if success or not
      */
     public boolean switchBuzzerStatus() {
-        buzzerStatus = !buzzerStatus;
         Integer buzzer;
         if (buzzerStatus) {
-            buzzer = 0;
-        } else {
             buzzer = 1;
+        } else {
+            buzzer = 0;
         }
         buzzer += 2;
         boolean success = true;
         try {
             con.pushData(buzzer.toString());
-        } catch (SerialPortException ex) {
             buzzerStatus = !buzzerStatus;
+        } catch (SerialPortException ex) {
             errorMessage = ex.getMessage();
             success = false;
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
@@ -250,23 +249,55 @@ public class Controller {
     }
     
     /**
-     * Create 3D Line Chart
+     * Create 3D Line Chart of Power
      * @return return chart
      */
-    public JFreeChart generateChart() {
+    public JFreeChart generatePowerLineChart() {
         JFreeChart lineChartObject = ChartFactory.createXYLineChart(
-         null,"TIME",
-         "POWER",
-         generateDataset(),PlotOrientation.VERTICAL,
+         null,"TIME (s)",
+         "POWER (W)",
+         generatePowerDataset(),PlotOrientation.VERTICAL,
          true,true,false);
         return lineChartObject;
     }
     
     /**
-     * Generate dataset for Line Chart
+     * Generate dataset of power for Line Chart
      * @return dataset
      */
-    private XYSeriesCollection generateDataset() {
+    private XYSeriesCollection generatePowerDataset() {
+        readData();
+        //generateDummyData();
+        XYSeries series = new XYSeries("power");
+        int time = 0;
+        /*for (int i = 0; i < 60; i++)
+            series.add(i, Math.random());*/
+        for (Double datum : listPowerData) {
+            series.add(time, datum);
+            time++;
+        }
+        dataset = new XYSeriesCollection(series);
+        return dataset;
+    }
+    
+    /**
+     * Create 3D Line Chart of Power
+     * @return return chart
+     */
+    public JFreeChart generateEnergyLineChart() {
+        JFreeChart lineChartObject = ChartFactory.createXYLineChart(
+         null,"TIME (s)",
+         "ENERGY (Wh)",
+         generateEnergyDataset(),PlotOrientation.VERTICAL,
+         true,true,false);
+        return lineChartObject;
+    }
+    
+    /**
+     * Generate dataset of power for Line Chart
+     * @return dataset
+     */
+    private XYSeriesCollection generateEnergyDataset() {
         readData();
         //generateDummyData();
         XYSeries series = new XYSeries("power");
@@ -296,9 +327,11 @@ public class Controller {
             listPowerData.remove();
         }
         listPowerData.add(data);
-        if (energyLimitter) {
-            totalPower += data;
+        totalPower += data;
+        if (listEnergyData.size() == sizeNumber) {
+            listEnergyData.remove();
         }
+        listEnergyData.add(totalPower/3600);
         if (timeLimitter) {
             timer++;
         }
@@ -313,11 +346,17 @@ public class Controller {
     
     private void checkEnergyLimit() throws SerialPortException {
         if (energyLimitter) {
+            System.out.println(totalPower/3600 + " " + energyLimit);
             if (totalPower/3600 >= energyLimit) {
-                JOptionPane.showMessageDialog(new JFrame(), "Limit has been reached", "INFORMATION", JOptionPane.INFORMATION_MESSAGE);
+                Thread t = new Thread() {
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(new JFrame(), "Limit has been reached", "INFORMATION", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                };
+                t.start();
                 energyLimitter = false;
                 energyLimit = Double.POSITIVE_INFINITY;
-                totalPower = 0;
                 con.pushData("0");
             } else if ((totalPower/3600) >= (energyLimit*0.9)) {
                 Thread t = new Thread() {

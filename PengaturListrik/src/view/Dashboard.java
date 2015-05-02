@@ -22,9 +22,9 @@ public class Dashboard extends javax.swing.JFrame {
 
     private final Controller controller;
     
-    private final String portName;
-    
     private final FrameController fc;
+    
+    private boolean energyChartSelected = true;
     
     /**
      * Creates new form Dashboard
@@ -34,7 +34,6 @@ public class Dashboard extends javax.swing.JFrame {
     public Dashboard(String portName, FrameController fc) {
         this.fc = fc;
         controller = new Controller(portName);
-        this.portName = portName;
         initComponents();
         if (!controller.getConnector().getStatus()) {
             switchButton.setEnabled(false);
@@ -56,7 +55,12 @@ public class Dashboard extends javax.swing.JFrame {
     
     public void updateChart() {
         chartPanel.removeAll();
-        ChartPanel chart = new ChartPanel(controller.generateChart());
+        ChartPanel chart;
+        if (energyChartSelected) {
+            chart = new ChartPanel(controller.generateEnergyLineChart());
+        } else {
+            chart = new ChartPanel(controller.generatePowerLineChart());
+        }
         chart.setDomainZoomable(true);
         chartPanel.add(chart, BorderLayout.CENTER);
         chartPanel.revalidate();
@@ -72,7 +76,7 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        ChartPanel chart = new ChartPanel(controller.generateChart());
+        ChartPanel chart = new ChartPanel(controller.generatePowerLineChart());
         chart.setDomainZoomable(true);
         chartPanel = new javax.swing.JPanel();
         controlPanel = new javax.swing.JPanel();
@@ -81,16 +85,17 @@ public class Dashboard extends javax.swing.JFrame {
         energyLimitButton = new javax.swing.JButton();
         buzzerButton = new javax.swing.JButton();
         timeLimit = new javax.swing.JSpinner();
-        energyLimit = new javax.swing.JSpinner();
         energyLabel = new javax.swing.JLabel();
         timeLabel = new javax.swing.JLabel();
         secondsLabel = new javax.swing.JLabel();
         WhLabel = new javax.swing.JLabel();
+        energyLimit = new javax.swing.JFormattedTextField();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         setPortButton = new javax.swing.JMenuItem();
         exitButton = new javax.swing.JMenuItem();
         actionMenu = new javax.swing.JMenu();
+        switchChart = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Dashboard");
@@ -141,7 +146,6 @@ public class Dashboard extends javax.swing.JFrame {
         });
         controlPanel.add(buzzerButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 290, 60, 40));
         controlPanel.add(timeLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 60, -1));
-        controlPanel.add(energyLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 210, 60, -1));
 
         energyLabel.setForeground(new java.awt.Color(255, 255, 255));
         energyLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -161,6 +165,11 @@ public class Dashboard extends javax.swing.JFrame {
         WhLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         WhLabel.setText("Wh");
         controlPanel.add(WhLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 210, 20, 20));
+
+        energyLimit.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
+        energyLimit.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        energyLimit.setText("0");
+        controlPanel.add(energyLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 210, 60, -1));
 
         fileMenu.setText("File");
 
@@ -183,6 +192,15 @@ public class Dashboard extends javax.swing.JFrame {
         menuBar.add(fileMenu);
 
         actionMenu.setText("Action");
+
+        switchChart.setText("Change to Power Chart");
+        switchChart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                switchChartActionPerformed(evt);
+            }
+        });
+        actionMenu.add(switchChart);
+
         menuBar.add(actionMenu);
 
         setJMenuBar(menuBar);
@@ -208,7 +226,7 @@ public class Dashboard extends javax.swing.JFrame {
     private void switchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchButtonActionPerformed
         boolean success = controller.switchCurrentStatus();
         if (success) {
-            controller.switchCurrentStatus();
+            changeSwitchTextButton();
         } else {
             JOptionPane.showMessageDialog(rootPane, controller.getErrorMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
         }
@@ -220,8 +238,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_timeLimitButtonActionPerformed
 
     private void energyLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_energyLimitButtonActionPerformed
-        Integer limit = (Integer) energyLimit.getValue();
-        controller.setEnergyLimit(Double.parseDouble(limit.toString()));
+        controller.setEnergyLimit(Double.parseDouble(energyLimit.getText()));
     }//GEN-LAST:event_energyLimitButtonActionPerformed
 
     private void buzzerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buzzerButtonActionPerformed
@@ -240,6 +257,15 @@ public class Dashboard extends javax.swing.JFrame {
     private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
         System.exit(0);
     }//GEN-LAST:event_exitButtonActionPerformed
+
+    private void switchChartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchChartActionPerformed
+        if (energyChartSelected) {
+            switchChart.setText("Change to Power Chart");
+        } else {
+            switchChart.setText("Change to Energy Chart");
+        }
+        energyChartSelected = !energyChartSelected;
+    }//GEN-LAST:event_switchChartActionPerformed
 
     private void changeSwitchTextButton() {
         if (controller.getCurrentStatus()) {
@@ -319,7 +345,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel chartPanel;
     private javax.swing.JPanel controlPanel;
     private javax.swing.JLabel energyLabel;
-    private javax.swing.JSpinner energyLimit;
+    private javax.swing.JFormattedTextField energyLimit;
     private javax.swing.JButton energyLimitButton;
     private javax.swing.JMenuItem exitButton;
     private javax.swing.JMenu fileMenu;
@@ -327,6 +353,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel secondsLabel;
     private javax.swing.JMenuItem setPortButton;
     private javax.swing.JButton switchButton;
+    private javax.swing.JMenuItem switchChart;
     private javax.swing.JLabel timeLabel;
     private javax.swing.JSpinner timeLimit;
     private javax.swing.JButton timeLimitButton;
