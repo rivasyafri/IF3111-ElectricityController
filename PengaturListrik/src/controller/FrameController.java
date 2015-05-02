@@ -23,6 +23,8 @@
  */
 package controller;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import view.Dashboard;
 import view.PortSetter;
 
@@ -47,6 +49,20 @@ public class FrameController {
     public void showDashboard() {
         portSetter.setVisible(false);
         dashboard.setVisible(true);
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        dashboard.updateChart();
+                        sleep(1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(FrameController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        };
+        t.start();
     }
     
     public Dashboard getDashboard() {
