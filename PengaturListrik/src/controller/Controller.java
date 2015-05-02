@@ -5,6 +5,7 @@
  */
 package controller;
 
+import static java.lang.Thread.sleep;
 import java.sql.Time;
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -38,11 +39,13 @@ public class Controller {
     
     private String errorMessage = "";
     
-    private Time timeLimit;
+    private Integer timeLimit;
     
     private Double energyLimit;
     
     private double totalPower;
+    
+    private int timer;
     
     private int sizeNumber;
     
@@ -198,7 +201,7 @@ public class Controller {
      * Get the time limit
      * @return time limit
      */
-    public Time getTimeConstrain() {
+    public int getTimeLimit() {
         return timeLimit;
     }
     
@@ -230,9 +233,10 @@ public class Controller {
      * Set the time limit
      * @param timeLimit new time limit
      */
-    public void setTimeLimit(Time timeLimit) {
+    public void setTimeLimit(Integer timeLimit) {
         this.timeLimit = timeLimit;
         timeLimitter = true;
+        timer = 0;
     }
     
     /**
@@ -294,28 +298,69 @@ public class Controller {
         listPowerData.add(data);
         if (energyLimitter) {
             totalPower += data;
-        }    
+        }
+        if (timeLimitter) {
+            timer++;
+        }
         try {
-            if (totalPower/3600 >= energyLimit) {
-                con.pushData("0");
-                JOptionPane.showMessageDialog(new JFrame(), "Limit has been reached", "INFORMATION", JOptionPane.INFORMATION_MESSAGE);
-                energyLimitter = false;
-                totalPower = 0;
-            } else if ((totalPower/3600) == (energyLimit*0.9)) {
-                con.pushData("2");
-                JOptionPane.showMessageDialog(new JFrame(), "90% to limit", "WARNING", JOptionPane.WARNING_MESSAGE);
-            }
+            checkEnergyLimit();
+            checkTimeLimit();
         } catch (SerialPortException ex) {
             errorMessage = ex.getMessage();
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    /*private void generateDummyData() {
+    private void checkEnergyLimit() throws SerialPortException {
+        if (energyLimitter) {
+            if (totalPower/3600 >= energyLimit) {
+                JOptionPane.showMessageDialog(new JFrame(), "Limit has been reached", "INFORMATION", JOptionPane.INFORMATION_MESSAGE);
+                energyLimitter = false;
+                energyLimit = Double.POSITIVE_INFINITY;
+                totalPower = 0;
+                con.pushData("0");
+            } else if ((totalPower/3600) >= (energyLimit*0.9)) {
+                Thread t = new Thread() {
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(new JFrame(), "90% to limit", "WARNING", JOptionPane.WARNING_MESSAGE);
+                    }
+                };
+                t.start();
+                con.pushData("2");
+            }
+        }
+    }
+    
+    private void checkTimeLimit() throws SerialPortException {
+        if (timeLimitter) {
+            System.out.println(timeLimit - timer);
+            if (timeLimit - timer == 0) {
+                JOptionPane.showMessageDialog(new JFrame(), "Limit has been reached", "INFORMATION", JOptionPane.INFORMATION_MESSAGE);
+                timeLimitter = false;
+                timeLimit = null;
+                con.pushData("0");
+            } else if (timeLimit - timer == 10) {
+                Thread t = new Thread() {
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(new JFrame(), "10 seconds to limit", "WARNING", JOptionPane.WARNING_MESSAGE);
+                    }
+                };
+                t.start();
+                con.pushData("2");
+            }
+        }
+    }
+    
+    /**
+     * Generate dummy data
+     */
+    private void generateDummyData() {
         double data = Math.random();
         if (listPowerData.size() == sizeNumber) {
             listPowerData.remove();
         }
         listPowerData.add(data);
-    }*/
+    }
 }

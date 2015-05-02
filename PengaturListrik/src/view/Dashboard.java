@@ -216,7 +216,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_switchButtonActionPerformed
 
     private void timeLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeLimitButtonActionPerformed
-        // TODO add your handling code here:
+        controller.setTimeLimit((Integer) timeLimit.getValue());
     }//GEN-LAST:event_timeLimitButtonActionPerformed
 
     private void energyLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_energyLimitButtonActionPerformed
