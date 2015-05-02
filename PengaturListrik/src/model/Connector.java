@@ -6,6 +6,10 @@
 package model;
 
 import java.io.BufferedReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import jssc.SerialPort;
 import jssc.SerialPortException;
 
@@ -14,6 +18,8 @@ import jssc.SerialPortException;
  * @author RivaSyafri
  */
 public class Connector {
+    
+    private boolean status = true;
     
     private SerialPort serialPort;
     
@@ -24,34 +30,32 @@ public class Connector {
     /**
      *
      * @param COM
+     * @throws jssc.SerialPortException
      */
     public Connector(String COM) {
-        serialPort = new SerialPort(COM);
         try {
-            // Open Serial Port
-            System.out.println("Port opened: " + serialPort.openPort());
-
-            // Define Parameter -- can be found in Device Manager
-            // baudRate, iataBits, stopBits, parity
-            System.out.println("Params setted: " + serialPort.setParams(9600, 8, 1, 0));
+            serialPort = new SerialPort(COM);
+            serialPort.openPort();
+            serialPort.setParams(9600,8,1,0);
         } catch (SerialPortException ex) {
-            System.out.println(ex);
-
+            status = false;
+            JOptionPane.showMessageDialog(new JFrame(), ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
         }
     }
     
     /**
      * Open connection to port
+     * @throws jssc.SerialPortException
      */
-    public void open(){
+    public void open() {
         try {
             serialPort.openPort();
-            
-            // Define Parameter -- can be found in Device Manager
-            // baudRate, iataBits, stopBits, parity
             serialPort.setParams(9600,8,1,0);
+            status = true;
         } catch (SerialPortException ex) {
-            System.out.println(ex);
+            status = false;
+            JOptionPane.showMessageDialog(new JFrame(), ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+            Logger.getLogger(Connector.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -62,17 +66,10 @@ public class Connector {
         try {
             serialPort.closePort();
         } catch (SerialPortException ex) {
+            status = true;
             System.out.println(ex);
         }
-    }
-    
-    /**
-     * Set port name to connection
-     * @param COM port name
-     */
-    public void setPortName(String COM) {
-        close();
-        serialPort = new SerialPort(COM);
+        status = false;
     }
     
     /**
@@ -100,11 +97,18 @@ public class Connector {
     
     /**
      * Send data to serial communication
-     * @param action action preference
-     * @throws jssc.SerialPortException exception that must be handled if failed to send
+     * @param action action preference 
+     * @throws jssc.SerialPortException exception if port is not connected
      */
     public void pushData(String action) throws SerialPortException {
         serialPort.writeBytes(action.getBytes());
-    }
+    }   
     
+    /**
+     * Get connection status
+     * @return true if connected
+     */
+    public boolean getStatus() {
+        return status;
+    }
 }

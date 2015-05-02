@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import jssc.SerialPortException;
 import model.Connector;
 import org.jfree.chart.ChartFactory;
@@ -30,6 +32,12 @@ public class Controller {
     
     private Boolean buzzerStatus = false;
     
+    private boolean energyLimitter = false;
+    
+    private boolean timeLimitter = false;
+    
+    private String errorMessage = "";
+    
     private Time timeLimit;
     
     private Double energyLimit;
@@ -44,16 +52,29 @@ public class Controller {
     
     /**
      * Create new instance of Controller
+     */
+    public Controller() {
+        System.out.println("Controller is instantiated");
+        this.sizeNumber = 60;
+        energyLimit = Double.POSITIVE_INFINITY;
+        timeLimit = null;
+        totalPower = 0;
+        listPowerData = new ArrayBlockingQueue(sizeNumber);
+    }
+    
+    /**
+     * Create new instance of Controller
      * @param COM port name
      */
     public Controller(String COM) {
         System.out.println("Controller is instantiated");
         this.sizeNumber = 60;
-        con = new Connector(COM);
         energyLimit = Double.POSITIVE_INFINITY;
         timeLimit = null;
         totalPower = 0;
         listPowerData = new ArrayBlockingQueue(sizeNumber);
+        con = new Connector(COM);
+        currentStatus = con.getStatus();
     }
     
     /**
@@ -67,68 +88,102 @@ public class Controller {
         timeLimit = null;
         totalPower = (float) 0;
         listPowerData = new ArrayBlockingQueue(sizeNumber);
+        currentStatus = con.getStatus();
     }
     
     /**
-     * Create 3D Line Chart
-     * @return return chart
+     * Set the connector
+     * @param COM port name
+     * @return true if success
      */
-    public JFreeChart generateChart() {
-        JFreeChart lineChartObject = ChartFactory.createXYLineChart(
-         null,"Time",
-         "Power",
-         generateDataset(),PlotOrientation.HORIZONTAL,
-         true,true,false);
-        return lineChartObject;
+    public void setConnection(String COM) {
+        con = new Connector(COM);
+        currentStatus = con.getStatus();
+    }
+    
+    /**
+     * Set the connector
+     * @param con
+     */
+    public void setConnection(Connector con) {
+        this.con = con;
+        currentStatus = con.getStatus();
     }
     
     /**
      * Change the connection
      * @param COM port name
+     * @return true if success
      */
     public void changeConnection(String COM) {
-        con.setPortName(COM);
-        con.open();
+        con = new Connector(COM);
+        currentStatus = con.getStatus();
+    }
+    
+    /**
+     * Change the connection
+     * @param con New connector
+     */
+    public void changeConnection(Connector con) {
+        this.con = con;
+        currentStatus = con.getStatus();
     }
     
     /**
      * Switch the status of current
+     * @return return value if success or not
      */
-    public void switchCurrentStatus() {
+    public boolean switchCurrentStatus() {
+        currentStatus = !currentStatus;
+        Integer current = 1;
+        if (currentStatus) {
+            current = 1;
+        } else {
+            current = 0;
+        }
+        boolean success = true;
         try {
-            currentStatus = !currentStatus;
-            Integer current = 1;
-            if (currentStatus) {
-                current = 1;
-            } else {
-                current = 0;
-            }
             con.pushData(current.toString());
         } catch (SerialPortException ex) {
             currentStatus = !currentStatus;
+            errorMessage = ex.getMessage();
+            success = false;
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return success;
     }
     
     /**
      * Switch the status of buzzer
+     * @return return value if success or not
      */
-    public void switchBuzzerStatus() {
+    public boolean switchBuzzerStatus() {
+        buzzerStatus = !buzzerStatus;
+        Integer buzzer;
+        if (buzzerStatus) {
+            buzzer = 0;
+        } else {
+            buzzer = 1;
+        }
+        buzzer += 2;
+        boolean success = true;
         try {
-            buzzerStatus = !buzzerStatus;
-            Integer buzzer = 0;
-            if (buzzerStatus) {
-                buzzer = 0;
-            } else {
-                buzzer = 1;
-            }
-            buzzer += 2;
             con.pushData(buzzer.toString());
         } catch (SerialPortException ex) {
             buzzerStatus = !buzzerStatus;
+            errorMessage = ex.getMessage();
+            success = false;
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+        return success;
+    }
+    
+    /**
+     * Get connector in controller
+     * @return connector
+     */
+    public Connector getConnector() {
+        return con;
     }
     
     /**
@@ -140,27 +195,11 @@ public class Controller {
     }
     
     /**
-     * Set the power limit 
-     * @param energyLimit the new power limit
-     */
-    public void setPowerConstrain(double energyLimit) {
-        this.energyLimit = energyLimit;
-    }
-    
-    /**
      * Get the time limit
      * @return time limit
      */
     public Time getTimeConstrain() {
         return timeLimit;
-    }
-    
-    /**
-     * Set the time limit
-     * @param timeLimit new time limit
-     */
-    public void setTimeConstrain(Time timeLimit) {
-        this.timeLimit = timeLimit;
     }
     
     /**
@@ -180,6 +219,46 @@ public class Controller {
     }
     
     /**
+     * Get error message from process
+     * @return error message
+     */
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+    
+    /**
+     * Set the time limit
+     * @param timeLimit new time limit
+     */
+    public void setTimeLimit(Time timeLimit) {
+        this.timeLimit = timeLimit;
+        timeLimitter = true;
+    }
+    
+    /**
+     * Set the power limit 
+     * @param energyLimit the new power limit
+     */
+    public void setEnergyLimit(double energyLimit) {
+        this.energyLimit = energyLimit;
+        energyLimitter = true;
+        System.out.println(energyLimit);
+    }
+    
+    /**
+     * Create 3D Line Chart
+     * @return return chart
+     */
+    public JFreeChart generateChart() {
+        JFreeChart lineChartObject = ChartFactory.createXYLineChart(
+         null,"TIME",
+         "POWER",
+         generateDataset(),PlotOrientation.VERTICAL,
+         true,true,false);
+        return lineChartObject;
+    }
+    
+    /**
      * Generate dataset for Line Chart
      * @return dataset
      */
@@ -187,11 +266,12 @@ public class Controller {
         readData();
         XYSeries series = new XYSeries("power");
         int time = 0;
-        for (Double datum : listPowerData) {
+        for (int i = 0; i < 30; i++)
+            series.add(Math.random(), i);
+        /*for (Double datum : listPowerData) {
             series.add(time, datum);
             time++;
-        }
-        System.out.println(Arrays.deepToString(listPowerData.toArray()));
+        }*/
         dataset = new XYSeriesCollection(series);
         return dataset;
     }
@@ -211,14 +291,21 @@ public class Controller {
             listPowerData.remove();
         }
         listPowerData.add(data);
-        totalPower += data;
+        if (energyLimitter) {
+            totalPower += data;
+        }    
         try {
             if (totalPower/3600 >= energyLimit) {
                 con.pushData("0");
+                JOptionPane.showMessageDialog(new JFrame(), "Limit has been reached", "INFORMATION", JOptionPane.INFORMATION_MESSAGE);
+                energyLimitter = false;
+                totalPower = 0;
             } else if ((totalPower/3600) == (energyLimit*0.9)) {
                 con.pushData("2");
+                JOptionPane.showMessageDialog(new JFrame(), "90% to limit", "WARNING", JOptionPane.WARNING_MESSAGE);
             }
         } catch (SerialPortException ex) {
+            errorMessage = ex.getMessage();
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

@@ -7,47 +7,39 @@ package view;
 
 import controller.Controller;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import org.jfree.chart.ChartPanel;
 
 /**
  *
- * @author RivaSyafri
+ * @author Riva Syafri Rachmatullah
  */
 public class Dashboard extends javax.swing.JFrame {
 
-    public final Controller controller;
+    private final Controller controller;
     
-    public double time = 0.0;
-    
-    // Init some starting data
-    double[][] model = {{0.0}};
-    double[] columns = {};
-    String[] rows = {"Power"};
-
-    String title = "Power Chart";
+    private final String portName;
     
     /**
      * Creates new form Dashboard
+     * @param portName
      */
-    public Dashboard() {
-       
-        controller = new Controller("COM4");
+    public Dashboard(String portName) {
+        controller = new Controller(portName);
+        this.portName = portName;
         initComponents();
+        if (!controller.getConnector().getStatus()) {
+            switchButton.setEnabled(false);
+            buzzerButton.setEnabled(false);
+        }
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
-        if (controller.getCurrentStatus()) {
-            switchButton.setText("READ ON");
-        } else {
-            switchButton.setText("READ OFF");
-        }
-        if (controller.getBuzzerStatus()) {
-            buzzerButton.setText("BUZZER ON");
-        } else {
-            buzzerButton.setText("BUZZER OFF");
-        }
+        changeSwitchTextButton();
+        changeBuzzerImage();
     }
 
     /**
@@ -66,57 +58,98 @@ public class Dashboard extends javax.swing.JFrame {
         switchButton = new javax.swing.JButton();
         timeLimitButton = new javax.swing.JButton();
         energyLimitButton = new javax.swing.JButton();
-        exitButton = new javax.swing.JButton();
         buzzerButton = new javax.swing.JButton();
         timeLimit = new javax.swing.JSpinner();
         energyLimit = new javax.swing.JSpinner();
-        jMenuBar1 = new javax.swing.JMenuBar();
+        energyLabel = new javax.swing.JLabel();
+        timeLabel = new javax.swing.JLabel();
+        secondsLabel = new javax.swing.JLabel();
+        WhLabel = new javax.swing.JLabel();
+        menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
-        jSeparator1 = new javax.swing.JPopupMenu.Separator();
-        exitButtonMenu = new javax.swing.JMenuItem();
+        setPortButton = new javax.swing.JMenuItem();
+        exitButton = new javax.swing.JMenuItem();
         actionMenu = new javax.swing.JMenu();
-        switchButtonMenu = new javax.swing.JMenuItem();
-        jSeparator2 = new javax.swing.JPopupMenu.Separator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Dashboard");
-        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        setMinimumSize(new java.awt.Dimension(502, 400));
+        setPreferredSize(new java.awt.Dimension(530, 400));
+        setResizable(false);
 
-        chartPanel.setPreferredSize(new java.awt.Dimension(438, 150));
+        chartPanel.setPreferredSize(new java.awt.Dimension(380, 380));
+        chartPanel.setRequestFocusEnabled(false);
         chartPanel.setLayout(new java.awt.BorderLayout());
 
         chartPanel.add(chart, BorderLayout.CENTER);
 
-        getContentPane().add(chartPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 408, 379));
-
         controlPanel.setBackground(new java.awt.Color(0, 0, 0, 200));
-        controlPanel.setPreferredSize(new java.awt.Dimension(150, 150));
+        controlPanel.setPreferredSize(new java.awt.Dimension(140, 380));
         controlPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        switchButton.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
-        switchButton.setText("SWITCH");
+        switchButton.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        switchButton.setText("OFF");
         switchButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 switchButtonActionPerformed(evt);
             }
         });
-        controlPanel.add(switchButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 11, -1, 40));
+        controlPanel.add(switchButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, 50));
 
-        timeLimitButton.setText("Set Time Limit");
+        timeLimitButton.setText("Set Timer");
         timeLimitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 timeLimitButtonActionPerformed(evt);
             }
         });
-        controlPanel.add(timeLimitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 143, 119, -1));
+        controlPanel.add(timeLimitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 140, 80, -1));
 
-        energyLimitButton.setText("Set Energy Limit");
+        energyLimitButton.setText("Set Limit");
         energyLimitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 energyLimitButtonActionPerformed(evt);
             }
         });
-        controlPanel.add(energyLimitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 251, 119, -1));
+        controlPanel.add(energyLimitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 240, 80, -1));
+
+        buzzerButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/off (60x38).jpg"))); // NOI18N
+        buzzerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buzzerButtonActionPerformed(evt);
+            }
+        });
+        controlPanel.add(buzzerButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 290, 60, 40));
+        controlPanel.add(timeLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 60, -1));
+        controlPanel.add(energyLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 210, 60, -1));
+
+        energyLabel.setForeground(new java.awt.Color(255, 255, 255));
+        energyLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        energyLabel.setText("Energy");
+        controlPanel.add(energyLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 180, 40, 20));
+
+        timeLabel.setForeground(new java.awt.Color(255, 255, 255));
+        timeLabel.setText("Time");
+        controlPanel.add(timeLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 90, -1, -1));
+
+        secondsLabel.setForeground(new java.awt.Color(255, 255, 255));
+        secondsLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        secondsLabel.setText("s");
+        controlPanel.add(secondsLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 110, 20, 20));
+
+        WhLabel.setForeground(new java.awt.Color(255, 255, 255));
+        WhLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        WhLabel.setText("Wh");
+        controlPanel.add(WhLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 210, 20, 20));
+
+        fileMenu.setText("File");
+
+        setPortButton.setText("Chenge Port Name");
+        setPortButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setPortButtonActionPerformed(evt);
+            }
+        });
+        fileMenu.add(setPortButton);
 
         exitButton.setText("Exit");
         exitButton.addActionListener(new java.awt.event.ActionListener() {
@@ -124,62 +157,41 @@ public class Dashboard extends javax.swing.JFrame {
                 exitButtonActionPerformed(evt);
             }
         });
-        controlPanel.add(exitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 332, 119, -1));
+        fileMenu.add(exitButton);
 
-        buzzerButton.setText("Buzzer Switch");
-        buzzerButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buzzerButtonActionPerformed(evt);
-            }
-        });
-        controlPanel.add(buzzerButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 56, 119, -1));
-        controlPanel.add(timeLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 117, 119, -1));
-        controlPanel.add(energyLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 225, 119, -1));
-
-        getContentPane().add(controlPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 0, 180, 379));
-
-        fileMenu.setText("File");
-        fileMenu.add(jSeparator1);
-
-        exitButtonMenu.setText("Exit");
-        exitButtonMenu.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitButtonMenuActionPerformed(evt);
-            }
-        });
-        fileMenu.add(exitButtonMenu);
-
-        jMenuBar1.add(fileMenu);
+        menuBar.add(fileMenu);
 
         actionMenu.setText("Action");
+        menuBar.add(actionMenu);
 
-        switchButtonMenu.setText("Switch");
-        switchButtonMenu.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                switchButtonMenuActionPerformed(evt);
-            }
-        });
-        actionMenu.add(switchButtonMenu);
-        actionMenu.add(jSeparator2);
+        setJMenuBar(menuBar);
 
-        jMenuBar1.add(actionMenu);
-
-        setJMenuBar(jMenuBar1);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(chartPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(controlPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(chartPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(controlPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void exitButtonMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonMenuActionPerformed
-        exit();
-    }//GEN-LAST:event_exitButtonMenuActionPerformed
-
     private void switchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchButtonActionPerformed
-        controller.switchCurrentStatus();
-        if (controller.getCurrentStatus()) {
-            switchButton.setText("READ ON");
+        boolean success = controller.switchCurrentStatus();
+        if (success) {
+            controller.switchCurrentStatus();
         } else {
-            switchButton.setText("READ OFF");
+            JOptionPane.showMessageDialog(rootPane, controller.getErrorMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
         }
+        changeSwitchTextButton();
     }//GEN-LAST:event_switchButtonActionPerformed
 
     private void timeLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeLimitButtonActionPerformed
@@ -187,34 +199,46 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_timeLimitButtonActionPerformed
 
     private void energyLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_energyLimitButtonActionPerformed
-        controller.setPowerConstrain((double) energyLimit.getValue());
-        
+        Integer limit = (Integer) energyLimit.getValue();
+        controller.setEnergyLimit(Double.parseDouble(limit.toString()));
     }//GEN-LAST:event_energyLimitButtonActionPerformed
 
-    private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
-        exit();
-    }//GEN-LAST:event_exitButtonActionPerformed
-
-    private void switchButtonMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchButtonMenuActionPerformed
-        controller.switchCurrentStatus();
-        if (controller.getCurrentStatus()) {
-            switchButton.setText("READ ON");
-        } else {
-            switchButton.setText("READ OFF");
-        }
-    }//GEN-LAST:event_switchButtonMenuActionPerformed
-
     private void buzzerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buzzerButtonActionPerformed
-        controller.switchBuzzerStatus();
-        if (controller.getBuzzerStatus()) {
-            buzzerButton.setText("BUZZER ON");
+        boolean success = controller.switchBuzzerStatus();
+        if (success) {
+            changeBuzzerImage();
         } else {
-            buzzerButton.setText("BUZZER OFF");
+            JOptionPane.showMessageDialog(rootPane, controller.getErrorMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_buzzerButtonActionPerformed
 
-    private void exit() {
+    private void setPortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setPortButtonActionPerformed
+        PortSetter portSetter = new PortSetter();
+        setVisible(false);
+        portSetter.setVisible(true);
+        dispose();
+    }//GEN-LAST:event_setPortButtonActionPerformed
+
+    private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
         System.exit(0);
+    }//GEN-LAST:event_exitButtonActionPerformed
+
+    private void changeSwitchTextButton() {
+        if (controller.getCurrentStatus()) {
+            switchButton.setText("ON");
+            switchButton.setForeground(Color.RED);
+        } else {
+            switchButton.setText("OFF");
+            switchButton.setForeground(Color.BLACK);
+        }
+    }
+    
+    private void changeBuzzerImage() {
+        if (controller.getBuzzerStatus()) {
+           buzzerButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/on (60x60).jpg"))); // NOI18N 
+        } else {
+            buzzerButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/off (60x38).jpg"))); // NOI18N
+        }
     }
     
     public Controller getController() {
@@ -228,13 +252,13 @@ public class Dashboard extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    //public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        try {
+        /*try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
@@ -276,24 +300,27 @@ public class Dashboard extends javax.swing.JFrame {
             }
         };
         t.start();*/
-    }
+    /*}*/
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel WhLabel;
     private javax.swing.JMenu actionMenu;
     private javax.swing.JButton buzzerButton;
     private javax.swing.JPanel chartPanel;
     private javax.swing.JPanel controlPanel;
+    private javax.swing.JLabel energyLabel;
     private javax.swing.JSpinner energyLimit;
     private javax.swing.JButton energyLimitButton;
-    private javax.swing.JButton exitButton;
-    private javax.swing.JMenuItem exitButtonMenu;
+    private javax.swing.JMenuItem exitButton;
     private javax.swing.JMenu fileMenu;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPopupMenu.Separator jSeparator1;
-    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JMenuBar menuBar;
+    private javax.swing.JLabel secondsLabel;
+    private javax.swing.JMenuItem setPortButton;
     private javax.swing.JButton switchButton;
-    private javax.swing.JMenuItem switchButtonMenu;
+    private javax.swing.JLabel timeLabel;
     private javax.swing.JSpinner timeLimit;
     private javax.swing.JButton timeLimitButton;
     // End of variables declaration//GEN-END:variables
+
+
 }
