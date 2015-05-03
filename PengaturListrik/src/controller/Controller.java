@@ -138,7 +138,7 @@ public class Controller {
      * @return return value if success or not
      */
     public boolean switchCurrentStatus() {
-        Integer current = 1;
+        Integer current;
         if (currentStatus) {
             current = 0;
         } else {

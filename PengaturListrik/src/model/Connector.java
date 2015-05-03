@@ -5,7 +5,6 @@
  */
 package model;
 
-import java.io.BufferedReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
@@ -23,14 +22,9 @@ public class Connector {
     
     private SerialPort serialPort;
     
-    private byte[] buffer;
-    
-    private BufferedReader input;
-    
     /**
      *
      * @param COM
-     * @throws jssc.SerialPortException
      */
     public Connector(String COM) {
         try {
@@ -45,7 +39,6 @@ public class Connector {
     
     /**
      * Open connection to port
-     * @throws jssc.SerialPortException
      */
     public void open() {
         try {
