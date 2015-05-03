@@ -33,7 +33,7 @@ public class Dashboard extends javax.swing.JFrame {
      */
     public Dashboard(String portName, FrameController fc) {
         this.fc = fc;
-        controller = new Controller(portName);
+        controller = new Controller(portName, this);
         initComponents();
         if (!controller.getConnector().getStatus()) {
             switchButton.setEnabled(false);
@@ -267,7 +267,7 @@ public class Dashboard extends javax.swing.JFrame {
         energyChartSelected = !energyChartSelected;
     }//GEN-LAST:event_switchChartActionPerformed
 
-    private void changeSwitchTextButton() {
+    public void changeSwitchTextButton() {
         if (controller.getCurrentStatus()) {
             switchButton.setText("ON");
             switchButton.setForeground(Color.RED);
@@ -277,7 +277,7 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
     
-    private void changeBuzzerImage() {
+    public void changeBuzzerImage() {
         if (controller.getBuzzerStatus()) {
            buzzerButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/on (60x60).jpg"))); // NOI18N 
         } else {

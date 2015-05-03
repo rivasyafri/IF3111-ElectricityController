@@ -5,9 +5,7 @@
  */
 package controller;
 
-import static java.lang.Thread.sleep;
-import java.sql.Time;
-import java.util.Arrays;
+import java.util.ArrayDeque;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +18,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import view.Dashboard;
 
 /**
  * Class to control connector and to process data
@@ -28,78 +27,73 @@ import org.jfree.data.xy.XYSeriesCollection;
 public class Controller {
     
     private Connector con;
-    
-    private Boolean currentStatus = true;
-    
-    private Boolean buzzerStatus = false;
-    
+    private Boolean currentStatus = true;    
+    private Boolean buzzerStatus = false;    
     private boolean energyLimitter = false;
-    
     private boolean timeLimitter = false;
-    
     private String errorMessage = "";
-    
     private Integer timeLimit;
-    
     private Double energyLimit;
-    
     private double totalPower;
-    
     private int timer;
-    
     private final int sizeNumber = 60;
-    
     private ArrayBlockingQueue<Double> listPowerData;
-    
-    private ArrayBlockingQueue<Double> listEnergyData;
-    
+    private ArrayDeque<Double> listEnergyData;
     private XYSeriesCollection dataset;
+    private final Dashboard d;
+    private boolean showEnergyWarning = false;
+    private boolean showTimeWarning = false;
     
     /**
      * Create new instance of Controller
+     * @param d Dashboard
      */
-    public Controller() {
+    public Controller(Dashboard d) {
         System.out.println("Controller is instantiated");
         energyLimit = Double.POSITIVE_INFINITY;
         timeLimit = null;
         totalPower = 0;
         listPowerData = new ArrayBlockingQueue(sizeNumber);
-        listEnergyData = new ArrayBlockingQueue(sizeNumber);
+        listEnergyData = new ArrayDeque();
+        this.d = d;
     }
     
     /**
      * Create new instance of Controller
      * @param COM port name
+     * @param d Dashboard
      */
-    public Controller(String COM) {
+    public Controller(String COM, Dashboard d) {
         System.out.println("Controller is instantiated");
         energyLimit = Double.POSITIVE_INFINITY;
         timeLimit = null;
         totalPower = 0;
         listPowerData = new ArrayBlockingQueue(sizeNumber);
-        listEnergyData = new ArrayBlockingQueue(sizeNumber);
+        listEnergyData = new ArrayDeque();
         con = new Connector(COM);
         currentStatus = con.getStatus();
+        this.d = d;
     }
     
     /**
      * Create new instance of Controller
      * @param con connector
+     * @param d dashboard
      */
-    public Controller(Connector con) {
+    public Controller(Connector con, Dashboard d) {
         this.con = con;
         energyLimit = null;
         timeLimit = null;
         totalPower = (float) 0;
         listPowerData = new ArrayBlockingQueue(sizeNumber);
-        listEnergyData = new ArrayBlockingQueue(sizeNumber);
+        listEnergyData = new ArrayDeque();
         currentStatus = con.getStatus();
+        this.d = d;
     }
     
     /**
      * Set the connector
      * @param COM port name
-     * @return true if success
      */
     public void setConnection(String COM) {
         con = new Connector(COM);
@@ -304,7 +298,7 @@ public class Controller {
         int time = 0;
         /*for (int i = 0; i < 60; i++)
             series.add(i, Math.random());*/
-        for (Double datum : listPowerData) {
+        for (Double datum : listEnergyData) {
             series.add(time, datum);
             time++;
         }
@@ -328,7 +322,7 @@ public class Controller {
         }
         listPowerData.add(data);
         totalPower += data;
-        if (listEnergyData.size() == sizeNumber) {
+        if (listEnergyData.size() == 3600) {
             listEnergyData.remove();
         }
         listEnergyData.add(totalPower/3600);
@@ -355,18 +349,17 @@ public class Controller {
                     }
                 };
                 t.start();
+                showEnergyWarning = false;
                 energyLimitter = false;
                 energyLimit = Double.POSITIVE_INFINITY;
                 con.pushData("0");
-            } else if ((totalPower/3600) >= (energyLimit*0.9)) {
-                Thread t = new Thread() {
-                    @Override
-                    public void run() {
-                        JOptionPane.showMessageDialog(new JFrame(), "90% to limit", "WARNING", JOptionPane.WARNING_MESSAGE);
-                    }
-                };
-                t.start();
                 con.pushData("2");
+                buzzerStatus = true;
+                currentStatus = false;
+                d.changeSwitchTextButton();
+                d.changeBuzzerImage();
+            } else if ((totalPower/3600) >= (energyLimit*0.9)) {
+                switchBuzzerStatus();
             }
         }
     }
@@ -375,19 +368,23 @@ public class Controller {
         if (timeLimitter) {
             System.out.println(timeLimit - timer);
             if (timeLimit - timer == 0) {
-                JOptionPane.showMessageDialog(new JFrame(), "Limit has been reached", "INFORMATION", JOptionPane.INFORMATION_MESSAGE);
-                timeLimitter = false;
-                timeLimit = null;
-                con.pushData("0");
-            } else if (timeLimit - timer == 10) {
                 Thread t = new Thread() {
                     @Override
                     public void run() {
-                        JOptionPane.showMessageDialog(new JFrame(), "10 seconds to limit", "WARNING", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(new JFrame(), "Limit has been reached", "INFORMATION", JOptionPane.INFORMATION_MESSAGE);
                     }
                 };
                 t.start();
+                timeLimitter = false;
+                timeLimit = null;
+                con.pushData("0");
                 con.pushData("2");
+                buzzerStatus = true;
+                currentStatus = false;
+                d.changeSwitchTextButton();
+                d.changeBuzzerImage();
+            } else if (timeLimit - timer <= 10) {
+                switchBuzzerStatus();
             }
         }
     }
