@@ -41,8 +41,6 @@ public class Controller {
     private ArrayDeque<Double> listEnergyData;
     private XYSeriesCollection dataset;
     private final Dashboard d;
-    private boolean showEnergyWarning = false;
-    private boolean showTimeWarning = false;
     
     /**
      * Create new instance of Controller
@@ -312,10 +310,16 @@ public class Controller {
     private void readData() {
         byte[] rawdata = con.pullData();
         Double data;
-        if (rawdata == null) {
+        String stringdata = new String(rawdata);
+        if (rawdata == null || stringdata.isEmpty()) {
             data = (double) 0;
         } else {
-            data = Double.valueOf(new String(rawdata));
+            try {
+                data = Double.valueOf(stringdata);
+            } catch (NumberFormatException ex) {
+                data = (double) 0;
+                d.getFrameController().showPortSetter();
+            }
         }
         if (listPowerData.size() == sizeNumber) {
             listPowerData.remove();
@@ -349,7 +353,6 @@ public class Controller {
                     }
                 };
                 t.start();
-                showEnergyWarning = false;
                 energyLimitter = false;
                 energyLimit = Double.POSITIVE_INFINITY;
                 con.pushData("0");

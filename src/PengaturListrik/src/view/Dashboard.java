@@ -285,6 +285,10 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
 
+    public FrameController getFrameController() {
+        return fc;
+    }
+    
     /**
      * @param args the command line arguments
      */
