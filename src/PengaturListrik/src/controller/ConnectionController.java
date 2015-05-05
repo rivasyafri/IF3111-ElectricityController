@@ -172,6 +172,7 @@ public class ConnectionController {
 
     private void checkTimeLimit() {
         if (timerStatus) {
+            System.out.println(timetoStop);
             try {
                 if (timetoStop == 0) {
                     timer.stop();
@@ -193,6 +194,7 @@ public class ConnectionController {
                     if (!muteStatus) {
                         switchBuzzerStatus();
                     }
+                    timetoStop--;
                 } else {
                     timetoStop--;
                 }

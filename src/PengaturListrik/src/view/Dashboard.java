@@ -521,7 +521,8 @@ public class Dashboard extends javax.swing.JFrame {
     public void updateDashboard() {
         portName.setModel(new javax.swing.DefaultComboBoxModel(SerialPortList.getPortNames()));
         setComponentsEnabled();
-        
+        setBuzzerText();
+        setSwitchText();
     }
     
     private JFreeChart generatePowerLineChart() {
@@ -607,16 +608,20 @@ public class Dashboard extends javax.swing.JFrame {
     private void buzzerSetting() {
         try {    
             cc.switchBuzzerStatus();
-            if (cc.getBuzzerStatus()) {
-                buzzerButton.setText("BUZZER ON");
-                buzzerMenu.setText("Switch Buzzer OFF");
-            } else {
-                buzzerButton.setText("BUZZER OFF");
-                buzzerMenu.setText("Switch Buzzer ON");
-            }
+            setBuzzerText();
         } catch (SerialPortException ex) {
             Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void setBuzzerText() {
+        if (cc.getBuzzerStatus()) {
+            buzzerButton.setText("BUZZER ON");
+            buzzerMenu.setText("Switch Buzzer OFF");
+        } else {
+            buzzerButton.setText("BUZZER OFF");
+            buzzerMenu.setText("Switch Buzzer ON");
         }
     }
     
@@ -646,16 +651,20 @@ public class Dashboard extends javax.swing.JFrame {
     private void switchSetting() {
         try {    
             cc.switchReadStatus();
-            if (cc.getReadStatus()) {
-                switchButton.setText("ON");
-                switchMenu.setText("Switch OFF");
-            } else {
-                switchButton.setText("OFF");
-                switchMenu.setText("Switch ON");
-            }
+            setSwitchText();
         } catch (SerialPortException ex) {
             Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void setSwitchText() {
+        if (cc.getReadStatus()) {
+            switchButton.setText("ON");
+            switchMenu.setText("Switch OFF");
+        } else {
+            switchButton.setText("OFF");
+            switchMenu.setText("Switch ON");
         }
     }
     
@@ -684,8 +693,9 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_timerMenuActionPerformed
 
     private void setTimer() {
-        cc.setTimerStatus(true);
+        System.out.println((Integer) timerField.getValue());
         cc.setTime((Integer) timerField.getValue());
+        cc.setTimerStatus(true);
         cc.timerON();
     }
     
