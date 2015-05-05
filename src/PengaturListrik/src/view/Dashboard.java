@@ -1,72 +1,76 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2015 Riva Syafri Rachmatullah
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package view;
 
-import controller.Controller;
-import controller.FrameController;
+import controller.ConnectionController;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
+import jssc.SerialPortException;
+import jssc.SerialPortList;
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 /**
  *
  * @author Riva Syafri Rachmatullah
  */
 public class Dashboard extends javax.swing.JFrame {
-
-    private final Controller controller;
-    
-    private final FrameController fc;
-    
-    private boolean energyChartSelected = true;
+    private boolean powerChartSelected = true;
+    private double totalPower;
+    private int currentTime = 0;
+    private int counter = 0;
+    private final ConnectionController cc;
+    private Timer timer;
+    private JFreeChart powerLineChart;
+    private JFreeChart energyLineChart;
+    private XYSeries energySeries;
+    private XYSeries powerSeries;
+    private XYSeriesCollection energyDataset;
+    private XYSeriesCollection powerDataset;
     
     /**
      * Creates new form Dashboard
-     * @param portName
-     * @param fc
      */
-    public Dashboard(String portName, FrameController fc) {
-        this.fc = fc;
-        controller = new Controller(portName, this);
+    public Dashboard() {
+        cc = new ConnectionController();
+        energySeries = new XYSeries("energy");
+        powerSeries = new XYSeries("power");
+        powerSeries.add(currentTime, 0);
+        energySeries.add(currentTime, 0);
+        currentTime++;
+        energyDataset = new XYSeriesCollection(energySeries);
+        powerDataset = new XYSeriesCollection(powerSeries);
+        powerLineChart = generatePowerLineChart();
+        energyLineChart = generateEnergyLineChart();
         initComponents();
-        if (!controller.getConnector().getStatus()) {
-            switchButton.setEnabled(false);
-            buzzerButton.setEnabled(false);
-        }
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
-        changeSwitchTextButton();
-        changeBuzzerImage();
     }
 
-    public Controller getController() {
-        return controller;
-    }
-    
-    public javax.swing.JPanel getChartPanel() {
-        return chartPanel;
-    }
-    
-    public void updateChart() {
-        chartPanel.removeAll();
-        ChartPanel chart;
-        if (energyChartSelected) {
-            chart = new ChartPanel(controller.generateEnergyLineChart());
-        } else {
-            chart = new ChartPanel(controller.generatePowerLineChart());
-        }
-        chart.setDomainZoomable(true);
-        chartPanel.add(chart, BorderLayout.CENTER);
-        chartPanel.revalidate();
-        chartPanel.repaint();
-    }
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -76,130 +80,401 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        ChartPanel chart = new ChartPanel(controller.generatePowerLineChart());
+        ChartPanel chart = new ChartPanel(powerLineChart);
         chart.setDomainZoomable(true);
         chartPanel = new javax.swing.JPanel();
         controlPanel = new javax.swing.JPanel();
+        actionPanel = new javax.swing.JPanel();
+        chartSettingPanel = new javax.swing.JPanel();
         switchButton = new javax.swing.JButton();
-        timeLimitButton = new javax.swing.JButton();
-        energyLimitButton = new javax.swing.JButton();
+        switchChartButton = new javax.swing.JButton();
+        inputPanel = new javax.swing.JPanel();
+        buzzerPanel = new javax.swing.JPanel();
         buzzerButton = new javax.swing.JButton();
-        timeLimit = new javax.swing.JSpinner();
-        energyLabel = new javax.swing.JLabel();
-        timeLabel = new javax.swing.JLabel();
-        secondsLabel = new javax.swing.JLabel();
-        WhLabel = new javax.swing.JLabel();
-        energyLimit = new javax.swing.JFormattedTextField();
+        muteButton = new javax.swing.JButton();
+        energyPanel = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        limitField = new javax.swing.JFormattedTextField();
+        limitButton = new javax.swing.JButton();
+        jLabel6 = new javax.swing.JLabel();
+        timerPanel = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        timerField = new javax.swing.JSpinner();
+        timerButton = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
+        connectionPanel = new javax.swing.JPanel();
+        portName = new javax.swing.JComboBox();
+        jLabel1 = new javax.swing.JLabel();
+        connectButton = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
-        setPortButton = new javax.swing.JMenuItem();
-        exitButton = new javax.swing.JMenuItem();
+        connectMenu = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        exitMenu = new javax.swing.JMenuItem();
         actionMenu = new javax.swing.JMenu();
-        switchChart = new javax.swing.JMenuItem();
+        switchChartMenu = new javax.swing.JMenuItem();
+        jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        switchMenu = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        buzzerMenu = new javax.swing.JMenuItem();
+        muteMenu = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        limitMenu = new javax.swing.JMenuItem();
+        timerMenu = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Dashboard");
-        setMinimumSize(new java.awt.Dimension(502, 400));
-        setPreferredSize(new java.awt.Dimension(530, 400));
-        setResizable(false);
 
-        chartPanel.setPreferredSize(new java.awt.Dimension(380, 380));
-        chartPanel.setRequestFocusEnabled(false);
+        chartPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 3, 0, new java.awt.Color(0, 0, 0)));
+        chartPanel.setPreferredSize(new java.awt.Dimension(600, 600));
         chartPanel.setLayout(new java.awt.BorderLayout());
 
-        chartPanel.add(chart, BorderLayout.CENTER);
+        chartPanel.add(chart, java.awt.BorderLayout.CENTER);
 
-        controlPanel.setBackground(new java.awt.Color(0, 0, 0, 200));
-        controlPanel.setPreferredSize(new java.awt.Dimension(140, 380));
-        controlPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        controlPanel.setPreferredSize(new java.awt.Dimension(600, 173));
 
-        switchButton.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
-        switchButton.setText("OFF");
+        actionPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        chartSettingPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        chartSettingPanel.setPreferredSize(new java.awt.Dimension(160, 160));
+
+        switchButton.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        switchButton.setText("ON");
+        switchButton.setEnabled(false);
+        switchButton.setPreferredSize(new java.awt.Dimension(65, 55));
         switchButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 switchButtonActionPerformed(evt);
             }
         });
-        controlPanel.add(switchButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, 50));
 
-        timeLimitButton.setText("Set Timer");
-        timeLimitButton.addActionListener(new java.awt.event.ActionListener() {
+        switchChartButton.setText("Energy Chart");
+        switchChartButton.setEnabled(false);
+        switchChartButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                timeLimitButtonActionPerformed(evt);
+                switchChartButtonActionPerformed(evt);
             }
         });
-        controlPanel.add(timeLimitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 140, 80, -1));
 
-        energyLimitButton.setText("Set Limit");
-        energyLimitButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                energyLimitButtonActionPerformed(evt);
-            }
-        });
-        controlPanel.add(energyLimitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 240, 80, -1));
+        javax.swing.GroupLayout chartSettingPanelLayout = new javax.swing.GroupLayout(chartSettingPanel);
+        chartSettingPanel.setLayout(chartSettingPanelLayout);
+        chartSettingPanelLayout.setHorizontalGroup(
+            chartSettingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(chartSettingPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(chartSettingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(switchButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(switchChartButton, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        chartSettingPanelLayout.setVerticalGroup(
+            chartSettingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(chartSettingPanelLayout.createSequentialGroup()
+                .addGap(29, 29, 29)
+                .addComponent(switchChartButton)
+                .addGap(29, 29, 29)
+                .addComponent(switchButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(22, 22, 22))
+        );
 
-        buzzerButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/off (60x38).jpg"))); // NOI18N
+        buzzerPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        buzzerButton.setText("BUZZER OFF");
+        buzzerButton.setEnabled(false);
         buzzerButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buzzerButtonActionPerformed(evt);
             }
         });
-        controlPanel.add(buzzerButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 290, 60, 40));
-        controlPanel.add(timeLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 60, -1));
 
-        energyLabel.setForeground(new java.awt.Color(255, 255, 255));
-        energyLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        energyLabel.setText("Energy");
-        controlPanel.add(energyLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 180, 40, 20));
+        muteButton.setText("MUTE OFF");
+        muteButton.setEnabled(false);
+        muteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                muteButtonActionPerformed(evt);
+            }
+        });
 
-        timeLabel.setForeground(new java.awt.Color(255, 255, 255));
-        timeLabel.setText("Time");
-        controlPanel.add(timeLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 90, -1, -1));
+        javax.swing.GroupLayout buzzerPanelLayout = new javax.swing.GroupLayout(buzzerPanel);
+        buzzerPanel.setLayout(buzzerPanelLayout);
+        buzzerPanelLayout.setHorizontalGroup(
+            buzzerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(buzzerPanelLayout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addComponent(buzzerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(muteButton, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        buzzerPanelLayout.setVerticalGroup(
+            buzzerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(buzzerPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(buzzerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(buzzerButton)
+                    .addComponent(muteButton))
+                .addContainerGap(16, Short.MAX_VALUE))
+        );
 
-        secondsLabel.setForeground(new java.awt.Color(255, 255, 255));
-        secondsLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        secondsLabel.setText("s");
-        controlPanel.add(secondsLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 110, 20, 20));
+        energyPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-        WhLabel.setForeground(new java.awt.Color(255, 255, 255));
-        WhLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        WhLabel.setText("Wh");
-        controlPanel.add(WhLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 210, 20, 20));
+        jLabel4.setText("Set Limit");
 
-        energyLimit.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
-        energyLimit.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        energyLimit.setText("0");
-        controlPanel.add(energyLimit, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 210, 60, -1));
+        limitField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
+        limitField.setEnabled(false);
+
+        limitButton.setText("Set Energy Limit");
+        limitButton.setEnabled(false);
+        limitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                limitButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel6.setText("Wh");
+
+        javax.swing.GroupLayout energyPanelLayout = new javax.swing.GroupLayout(energyPanel);
+        energyPanel.setLayout(energyPanelLayout);
+        energyPanelLayout.setHorizontalGroup(
+            energyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(energyPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(energyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(energyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(limitButton)
+                        .addGroup(energyPanelLayout.createSequentialGroup()
+                            .addComponent(limitField)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jLabel6)))
+                    .addComponent(jLabel4))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        energyPanelLayout.setVerticalGroup(
+            energyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(energyPanelLayout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(energyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(limitField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(limitButton)
+                .addContainerGap(15, Short.MAX_VALUE))
+        );
+
+        timerPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jLabel5.setText("Set Timer");
+
+        timerField.setEnabled(false);
+
+        timerButton.setText("Set Timer");
+        timerButton.setEnabled(false);
+        timerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                timerButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel7.setText("s");
+
+        javax.swing.GroupLayout timerPanelLayout = new javax.swing.GroupLayout(timerPanel);
+        timerPanel.setLayout(timerPanelLayout);
+        timerPanelLayout.setHorizontalGroup(
+            timerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(timerPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(timerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5)
+                    .addComponent(timerButton)
+                    .addGroup(timerPanelLayout.createSequentialGroup()
+                        .addComponent(timerField, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 13, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        timerPanelLayout.setVerticalGroup(
+            timerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(timerPanelLayout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(timerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(timerField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(timerButton)
+                .addContainerGap(15, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout inputPanelLayout = new javax.swing.GroupLayout(inputPanel);
+        inputPanel.setLayout(inputPanelLayout);
+        inputPanelLayout.setHorizontalGroup(
+            inputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(buzzerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(inputPanelLayout.createSequentialGroup()
+                .addComponent(energyPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(timerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        inputPanelLayout.setVerticalGroup(
+            inputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(inputPanelLayout.createSequentialGroup()
+                .addComponent(buzzerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(inputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(energyPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(timerPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+        );
+
+        javax.swing.GroupLayout actionPanelLayout = new javax.swing.GroupLayout(actionPanel);
+        actionPanel.setLayout(actionPanelLayout);
+        actionPanelLayout.setHorizontalGroup(
+            actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, actionPanelLayout.createSequentialGroup()
+                .addComponent(inputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chartSettingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        actionPanelLayout.setVerticalGroup(
+            actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(inputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(chartSettingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+
+        javax.swing.GroupLayout controlPanelLayout = new javax.swing.GroupLayout(controlPanel);
+        controlPanel.setLayout(controlPanelLayout);
+        controlPanelLayout.setHorizontalGroup(
+            controlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(controlPanelLayout.createSequentialGroup()
+                .addComponent(actionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        controlPanelLayout.setVerticalGroup(
+            controlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(actionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+
+        connectionPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        connectionPanel.setPreferredSize(new java.awt.Dimension(167, 162));
+
+        portName.setModel(new javax.swing.DefaultComboBoxModel(SerialPortList.getPortNames()));
+
+        jLabel1.setText("PORT NAME");
+
+        connectButton.setText("CONNECT");
+        connectButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                connectButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout connectionPanelLayout = new javax.swing.GroupLayout(connectionPanel);
+        connectionPanel.setLayout(connectionPanelLayout);
+        connectionPanelLayout.setHorizontalGroup(
+            connectionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(connectionPanelLayout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(connectionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(connectButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(connectionPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(portName, 0, 69, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        connectionPanelLayout.setVerticalGroup(
+            connectionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(connectionPanelLayout.createSequentialGroup()
+                .addGap(51, 51, 51)
+                .addGroup(connectionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(portName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(connectButton)
+                .addContainerGap(55, Short.MAX_VALUE))
+        );
 
         fileMenu.setText("File");
 
-        setPortButton.setText("Chenge Port Name");
-        setPortButton.addActionListener(new java.awt.event.ActionListener() {
+        connectMenu.setText("Connect");
+        connectMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                setPortButtonActionPerformed(evt);
+                connectMenuActionPerformed(evt);
             }
         });
-        fileMenu.add(setPortButton);
+        fileMenu.add(connectMenu);
+        fileMenu.add(jSeparator1);
 
-        exitButton.setText("Exit");
-        exitButton.addActionListener(new java.awt.event.ActionListener() {
+        exitMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
+        exitMenu.setText("Exit");
+        exitMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitButtonActionPerformed(evt);
+                exitMenuActionPerformed(evt);
             }
         });
-        fileMenu.add(exitButton);
+        fileMenu.add(exitMenu);
 
         menuBar.add(fileMenu);
 
         actionMenu.setText("Action");
 
-        switchChart.setText("Change to Power Chart");
-        switchChart.addActionListener(new java.awt.event.ActionListener() {
+        switchChartMenu.setText("Switch to Energy Chart");
+        switchChartMenu.setEnabled(false);
+        switchChartMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                switchChartActionPerformed(evt);
+                switchChartMenuActionPerformed(evt);
             }
         });
-        actionMenu.add(switchChart);
+        actionMenu.add(switchChartMenu);
+        actionMenu.add(jSeparator4);
+
+        switchMenu.setText("Switch ON");
+        switchMenu.setEnabled(false);
+        switchMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                switchMenuActionPerformed(evt);
+            }
+        });
+        actionMenu.add(switchMenu);
+        actionMenu.add(jSeparator3);
+
+        buzzerMenu.setText("Switch Buzzer ON");
+        buzzerMenu.setEnabled(false);
+        buzzerMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buzzerMenuActionPerformed(evt);
+            }
+        });
+        actionMenu.add(buzzerMenu);
+
+        muteMenu.setText("Mute ON");
+        muteMenu.setEnabled(false);
+        muteMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                muteMenuActionPerformed(evt);
+            }
+        });
+        actionMenu.add(muteMenu);
+        actionMenu.add(jSeparator2);
+
+        limitMenu.setText("Set Energy Limit ...");
+        limitMenu.setEnabled(false);
+        limitMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                limitMenuActionPerformed(evt);
+            }
+        });
+        actionMenu.add(limitMenu);
+
+        timerMenu.setText("Set Timer ...");
+        timerMenu.setEnabled(false);
+        timerMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                timerMenuActionPerformed(evt);
+            }
+        });
+        actionMenu.add(timerMenu);
 
         menuBar.add(actionMenu);
 
@@ -209,96 +484,252 @@ public class Dashboard extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(chartPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
-                .addComponent(controlPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(6, 6, 6)
+                .addComponent(connectionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(controlPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 417, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(chartPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addComponent(controlPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 589, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(controlPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(connectionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void switchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchButtonActionPerformed
-        boolean success = controller.switchCurrentStatus();
-        if (success) {
-            changeSwitchTextButton();
-        } else {
-            JOptionPane.showMessageDialog(rootPane, controller.getErrorMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+    public void updateChart() {
+        double data = cc.readData();
+        if (counter == 10000) {
+            powerSeries.remove(0);
+            energySeries.remove(0);
+        } else if (counter < 10000) {
+            counter++;
         }
-        changeSwitchTextButton();
-    }//GEN-LAST:event_switchButtonActionPerformed
-
-    private void timeLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeLimitButtonActionPerformed
-        controller.setTimeLimit((Integer) timeLimit.getValue());
-    }//GEN-LAST:event_timeLimitButtonActionPerformed
-
-    private void energyLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_energyLimitButtonActionPerformed
-        controller.setEnergyLimit(Double.parseDouble(energyLimit.getText()));
-    }//GEN-LAST:event_energyLimitButtonActionPerformed
-
-    private void buzzerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buzzerButtonActionPerformed
-        boolean success = controller.switchBuzzerStatus();
-        if (success) {
-            changeBuzzerImage();
-        } else {
-            JOptionPane.showMessageDialog(rootPane, controller.getErrorMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
-        }
-    }//GEN-LAST:event_buzzerButtonActionPerformed
-
-    private void setPortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setPortButtonActionPerformed
-        fc.showPortSetter();
-    }//GEN-LAST:event_setPortButtonActionPerformed
-
-    private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
+        powerSeries.add(currentTime, data);
+        energySeries.add(currentTime, cc.getTotalPower()/3600);
+        currentTime++;
+    }
+    
+    public void updateDashboard() {
+        portName.setModel(new javax.swing.DefaultComboBoxModel(SerialPortList.getPortNames()));
+        setComponentsEnabled();
+        
+    }
+    
+    private JFreeChart generatePowerLineChart() {
+        JFreeChart lineChartObject = ChartFactory.createXYLineChart(
+         null,"TIME (s)",
+         "POWER (W)",
+         powerDataset,PlotOrientation.VERTICAL,
+         true,true,false);
+        return lineChartObject;
+    }
+    
+    private JFreeChart generateEnergyLineChart() {
+        JFreeChart lineChartObject = ChartFactory.createXYLineChart(
+         null,"TIME (s)",
+         "ENERGY (Wh)",
+         energyDataset,PlotOrientation.VERTICAL,
+         true,true,false);
+        return lineChartObject;
+    }
+    
+    private void exitMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuActionPerformed
         System.exit(0);
-    }//GEN-LAST:event_exitButtonActionPerformed
+    }//GEN-LAST:event_exitMenuActionPerformed
 
-    private void switchChartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchChartActionPerformed
-        if (energyChartSelected) {
-            switchChart.setText("Change to Power Chart");
-        } else {
-            switchChart.setText("Change to Energy Chart");
-        }
-        energyChartSelected = !energyChartSelected;
-    }//GEN-LAST:event_switchChartActionPerformed
+    private void connectMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectMenuActionPerformed
+        connectionSetting();
+    }//GEN-LAST:event_connectMenuActionPerformed
 
-    public void changeSwitchTextButton() {
-        if (controller.getCurrentStatus()) {
-            switchButton.setText("ON");
-            switchButton.setForeground(Color.RED);
-        } else {
-            switchButton.setText("OFF");
-            switchButton.setForeground(Color.BLACK);
+    private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
+        connectionSetting();
+    }//GEN-LAST:event_connectButtonActionPerformed
+
+    private void connectionSetting() {
+        try {    
+            if (cc.getConnectionStatus()) {
+                cc.disconnect();
+                connectButton.setText("CONNECT");
+                connectMenu.setText("Connect");
+                setComponentsEnabled();
+                timer.stop();
+            } else {
+                cc.connect((String) portName.getSelectedItem());
+                connectButton.setText("DISCONNECT");
+                connectMenu.setText("Disconnect");
+                setComponentsEnabled();
+                timer = new Timer(1000, (ActionEvent e) -> {
+                    updateChart();
+                });
+                timer.start();
+            }
+        } catch (SerialPortException ex) {
+            Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
         }
     }
     
-    public void changeBuzzerImage() {
-        if (controller.getBuzzerStatus()) {
-           buzzerButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/on (60x60).jpg"))); // NOI18N 
-        } else {
-            buzzerButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/view/off (60x38).jpg"))); // NOI18N
+    private void setComponentsEnabled() {
+        portName.setEnabled(!cc.getConnectionStatus());
+        switchButton.setEnabled(cc.getConnectionStatus());
+        switchMenu.setEnabled(cc.getConnectionStatus());
+        buzzerButton.setEnabled(cc.getConnectionStatus());
+        buzzerMenu.setEnabled(cc.getConnectionStatus());
+        muteButton.setEnabled(cc.getConnectionStatus());
+        muteMenu.setEnabled(cc.getConnectionStatus());
+        limitMenu.setEnabled(cc.getConnectionStatus());
+        limitButton.setEnabled(cc.getConnectionStatus());
+        limitField.setEnabled(cc.getConnectionStatus());
+        timerButton.setEnabled(cc.getConnectionStatus());
+        timerMenu.setEnabled(cc.getConnectionStatus());
+        timerField.setEnabled(cc.getConnectionStatus());
+        switchChartButton.setEnabled(cc.getConnectionStatus());
+        switchChartMenu.setEnabled(cc.getConnectionStatus());
+    }
+    
+    private void buzzerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buzzerButtonActionPerformed
+        buzzerSetting();
+    }//GEN-LAST:event_buzzerButtonActionPerformed
+
+    private void buzzerMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buzzerMenuActionPerformed
+        buzzerSetting();
+    }//GEN-LAST:event_buzzerMenuActionPerformed
+
+    private void buzzerSetting() {
+        try {    
+            cc.switchBuzzerStatus();
+            if (cc.getBuzzerStatus()) {
+                buzzerButton.setText("BUZZER ON");
+                buzzerMenu.setText("Switch Buzzer OFF");
+            } else {
+                buzzerButton.setText("BUZZER OFF");
+                buzzerMenu.setText("Switch Buzzer ON");
+            }
+        } catch (SerialPortException ex) {
+            Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
         }
     }
+    
+    private void muteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_muteButtonActionPerformed
+        muteSetting();
+    }//GEN-LAST:event_muteButtonActionPerformed
 
-    public FrameController getFrameController() {
-        return fc;
+    private void muteMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_muteMenuActionPerformed
+        muteSetting();
+    }//GEN-LAST:event_muteMenuActionPerformed
+
+    private void muteSetting() {
+        cc.switchMuteStatus();
+        if (cc.getMuteStatus()) {
+            muteButton.setText("MUTE ON");
+            muteMenu.setText("MUTE ON");
+        } else {
+            muteButton.setText("MUTE OFF");
+            muteMenu.setText("MUTE OFF");
+        }
+    }
+    
+    private void switchMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchMenuActionPerformed
+        switchSetting();
+    }//GEN-LAST:event_switchMenuActionPerformed
+
+    private void switchSetting() {
+        try {    
+            cc.switchReadStatus();
+            if (cc.getReadStatus()) {
+                switchButton.setText("ON");
+                switchMenu.setText("Switch OFF");
+            } else {
+                switchButton.setText("OFF");
+                switchMenu.setText("Switch ON");
+            }
+        } catch (SerialPortException ex) {
+            Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void limitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_limitButtonActionPerformed
+        setLimit();
+    }//GEN-LAST:event_limitButtonActionPerformed
+
+    private void limitMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_limitMenuActionPerformed
+        setLimit();
+    }//GEN-LAST:event_limitMenuActionPerformed
+
+    private void setLimit() {
+        try {
+            cc.setEnergyLimit(Double.parseDouble(limitField.getText()));
+        } catch (NumberFormatException ex) {
+            Logger.getLogger(ConnectionController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void timerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timerButtonActionPerformed
+        setTimer();
+    }//GEN-LAST:event_timerButtonActionPerformed
+
+    private void timerMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timerMenuActionPerformed
+        setTimer();
+    }//GEN-LAST:event_timerMenuActionPerformed
+
+    private void setTimer() {
+        cc.setTimerStatus(true);
+        cc.setTime((Integer) timerField.getValue());
+        cc.timerON();
+    }
+    
+    private void switchChartMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchChartMenuActionPerformed
+        switchChart();
+    }//GEN-LAST:event_switchChartMenuActionPerformed
+
+    private void switchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchButtonActionPerformed
+        switchSetting();
+    }//GEN-LAST:event_switchButtonActionPerformed
+
+    private void switchChartButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_switchChartButtonActionPerformed
+        switchChart();
+    }//GEN-LAST:event_switchChartButtonActionPerformed
+    
+    private void switchChart() {
+        powerChartSelected = !powerChartSelected;
+        chartPanel.removeAll();
+        ChartPanel chart;
+        if (powerChartSelected) {
+            switchChartButton.setText("Power Chart");
+            switchChartMenu.setText("Switch to Energy Chart");
+            chart = new ChartPanel(powerLineChart);
+        } else {
+            switchChartButton.setText("Energy Chart");
+            switchChartMenu.setText("Switch to Power Chart");
+            chart = new ChartPanel(energyLineChart);
+        }
+        chart.setDomainZoomable(true);
+        chartPanel.add(chart, BorderLayout.CENTER);
+        chartPanel.revalidate();
+        chartPanel.repaint();
     }
     
     /**
      * @param args the command line arguments
      */
-    //public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
+    public static void main(String args[]) {
+        /* Set the Windows look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        /*try {
+        try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
@@ -309,59 +740,59 @@ public class Dashboard extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(Dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        
+        //</editor-fold>
 
-        Dashboard main = new Dashboard();
+        /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
-            main.setVisible(true);
+            Dashboard d = new Dashboard();
+            d.setVisible(true);
+            Timer timer = new Timer(1000, (ActionEvent e) -> {
+                d.updateDashboard();
+            });
+            timer.start();
         });
-        /*
-        Thread t = new Thread() {
-            ChartPanel panel;
-            
-            @Override
-            public void run() {
-                while (true) {
-                    main.getChartPanel().removeAll();
-            
-                    // Creating the Swing ChartPanel instead of DefaultChart
-                    panel = new ChartPanel(data, title, DefaultChart.LINEAR_X_LINEAR_Y);
-                    // Adding ChartRenderer as usual
-                    panel.addChartRenderer(new LineChartRenderer(panel.getCoordSystem(), data), 1);
-                    panel.setSize(400, 300);
-                    main.getChartPanel().add(panel, BorderLayout.CENTER);
-
-                    double datum = main.controller.readData();
-                    System.out.println(datum);
-                    main.data.insertValue(0, datum, time);
-                    main.time++;
-                    panel.addChartPanel.revalidate();
-                    panel.addChartPanel.repaint();
-                }
-            }
-        };
-        t.start();*/
-    /*}*/
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel WhLabel;
     private javax.swing.JMenu actionMenu;
+    private javax.swing.JPanel actionPanel;
     private javax.swing.JButton buzzerButton;
+    private javax.swing.JMenuItem buzzerMenu;
+    private javax.swing.JPanel buzzerPanel;
     private javax.swing.JPanel chartPanel;
+    private javax.swing.JPanel chartSettingPanel;
+    private javax.swing.JButton connectButton;
+    private javax.swing.JMenuItem connectMenu;
+    private javax.swing.JPanel connectionPanel;
     private javax.swing.JPanel controlPanel;
-    private javax.swing.JLabel energyLabel;
-    private javax.swing.JFormattedTextField energyLimit;
-    private javax.swing.JButton energyLimitButton;
-    private javax.swing.JMenuItem exitButton;
+    private javax.swing.JPanel energyPanel;
+    private javax.swing.JMenuItem exitMenu;
     private javax.swing.JMenu fileMenu;
+    private javax.swing.JPanel inputPanel;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JPopupMenu.Separator jSeparator4;
+    private javax.swing.JButton limitButton;
+    private javax.swing.JFormattedTextField limitField;
+    private javax.swing.JMenuItem limitMenu;
     private javax.swing.JMenuBar menuBar;
-    private javax.swing.JLabel secondsLabel;
-    private javax.swing.JMenuItem setPortButton;
+    private javax.swing.JButton muteButton;
+    private javax.swing.JMenuItem muteMenu;
+    private javax.swing.JComboBox portName;
     private javax.swing.JButton switchButton;
-    private javax.swing.JMenuItem switchChart;
-    private javax.swing.JLabel timeLabel;
-    private javax.swing.JSpinner timeLimit;
-    private javax.swing.JButton timeLimitButton;
+    private javax.swing.JButton switchChartButton;
+    private javax.swing.JMenuItem switchChartMenu;
+    private javax.swing.JMenuItem switchMenu;
+    private javax.swing.JButton timerButton;
+    private javax.swing.JSpinner timerField;
+    private javax.swing.JMenuItem timerMenu;
+    private javax.swing.JPanel timerPanel;
     // End of variables declaration//GEN-END:variables
-
-
 }

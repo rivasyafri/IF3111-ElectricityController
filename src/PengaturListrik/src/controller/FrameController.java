@@ -21,76 +21,68 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package controller;
+/*package controller;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.Timer;
 import view.Dashboard;
-import view.PortSetter;
+import view.ConnectionSetting;
 
-/**
- *
- * @author RivaSyafri
- */
+
 public class FrameController {
     private Dashboard dashboard;
-    private PortSetter portSetter;
+    private ConnectionSetting connectionSetting;
     
     public FrameController() {
-        portSetter = new PortSetter(this);
-        portSetter.setVisible(true);
+        dashboard = new Dashboard(this);
     }
     
-    public void showPortSetter() {
-        portSetter.setVisible(true);
-        dashboard.setVisible(false);
+    public void showConnectionSetting() {
+        connectionSetting.setVisible(true);
     }
     
     public void showDashboard() {
-        portSetter.setVisible(false);
+        connectionSetting.setVisible(false);
         dashboard.setVisible(true);
-        Thread t = new Thread() {
+        Timer timer = new Timer(1000, new ActionListener() {
+            private boolean b;
+
             @Override
-            public void run() {
-                while (true) {
-                    try {
-                        dashboard.updateChart();
-                        sleep(1000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(FrameController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+            public void actionPerformed(ActionEvent e) {
+                dashboard.updateChart();
+                b = !b;
             }
-        };
-        t.start();
+        });
+        timer.start();
     }
     
     public Dashboard getDashboard() {
         return dashboard;
     }
     
-    public PortSetter getPortSetter() {
-        return portSetter;
+    public ConnectionSetting getConnectionSetting() {
+        return connectionSetting;
     }
     
     public void setDashboard(Dashboard dashboard) {
         this.dashboard = dashboard;
     }
     
-    public void setPortSetter(PortSetter portSetter) {
-        this.portSetter = portSetter;
+    public void setConnectionSetting(ConnectionSetting connectionSetting) {
+        this.connectionSetting = connectionSetting;
     }
     
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    //public static void main(String args[]) {
         /* Set the Windows look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        try {
+        /*try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
@@ -98,9 +90,9 @@ public class FrameController {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PortSetter.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ConnectionSetting.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
         FrameController fc = new FrameController();
-    }
-}
+    }*/
+/*}*/
