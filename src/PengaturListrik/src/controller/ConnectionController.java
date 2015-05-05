@@ -62,6 +62,7 @@ public class ConnectionController {
             Double data;
             if (rawdata == null || rawdata.isEmpty()) {
                 data = (double) 0;
+                connectionStatus = false;
             } else {
                 data = Double.valueOf(rawdata);
             }
@@ -69,7 +70,7 @@ public class ConnectionController {
             checkEnergyLimit();
             return data;
         } catch (SerialPortException ex) {
-            Logger.getLogger(ConnectionController.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex);
             return 0;
         }
     }
@@ -119,6 +120,10 @@ public class ConnectionController {
             checkTimeLimit();
         });
         timer.start();
+    }
+    
+    public void setReadStatus(boolean status) {
+        readStatus = status;
     }
     
     public boolean getConnectionStatus() {

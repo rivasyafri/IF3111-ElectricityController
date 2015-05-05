@@ -506,23 +506,28 @@ public class Dashboard extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     public void updateChart() {
-        double data = cc.readData();
-        if (counter == 10000) {
-            powerSeries.remove(0);
-            energySeries.remove(0);
-        } else if (counter < 10000) {
-            counter++;
+        if (cc.getConnectionStatus()) {
+            double data = cc.readData();
+            if (counter == 10000) {
+                powerSeries.remove(0);
+                energySeries.remove(0);
+            } else if (counter < 10000) {
+                counter++;
+            }
+            powerSeries.add(currentTime, data);
+            energySeries.add(currentTime, cc.getTotalPower()/3600);
+            currentTime++;
+        } else {
+            timer.stop();
         }
-        powerSeries.add(currentTime, data);
-        energySeries.add(currentTime, cc.getTotalPower()/3600);
-        currentTime++;
     }
     
     public void updateDashboard() {
         portName.setModel(new javax.swing.DefaultComboBoxModel(SerialPortList.getPortNames()));
         setComponentsEnabled();
-        setBuzzerText();
+        setConnectionText();
         setSwitchText();
+        setBuzzerText();
     }
     
     private JFreeChart generatePowerLineChart() {
@@ -559,12 +564,14 @@ public class Dashboard extends javax.swing.JFrame {
         try {    
             if (cc.getConnectionStatus()) {
                 cc.disconnect();
+                cc.setReadStatus(false);
                 connectButton.setText("CONNECT");
                 connectMenu.setText("Connect");
                 setComponentsEnabled();
                 timer.stop();
             } else {
                 cc.connect((String) portName.getSelectedItem());
+                cc.setReadStatus(true);
                 connectButton.setText("DISCONNECT");
                 connectMenu.setText("Disconnect");
                 setComponentsEnabled();
@@ -576,6 +583,16 @@ public class Dashboard extends javax.swing.JFrame {
         } catch (SerialPortException ex) {
             Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void setConnectionText() {
+        if (!cc.getConnectionStatus()) {
+            connectButton.setText("CONNECT");
+            connectMenu.setText("Connect");
+        } else {
+            connectButton.setText("DISCONNECT");
+            connectMenu.setText("Disconnect");
         }
     }
     
